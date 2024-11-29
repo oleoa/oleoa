@@ -1,1 +1,2 @@
 # oleoa
+Programmer and entrepreneur
