@@ -1,0 +1,30 @@
+[
+  {
+    "name": "Achieve Rent a Car",
+    "description": "A website for a car rental company",
+    "link": "https://achieverentacar.com/en",
+    "source": "https://github.com/oleoa/achieve-astro",
+    "stacks": ["astro", "netlify", "tailwind", "typescript"]
+  },
+  {
+    "name": "Lordle",
+    "description": "Worlde game",
+    "link": "https://lordle.netlify.app/",
+    "source": "https://github.com/oleoa/lordle",
+    "stacks": ["vite", "netlify", "tailwind", "typescript"]
+  },
+  {
+    "name": "Chat",
+    "description": "A simple chat app",
+    "link": "https://oleoa-chat.netlify.app",
+    "source": "https://github.com/oleoa/chat",
+    "stacks": ["nextjs", "tailwind", "zod", "supabase", "react", "typescript"]
+  },
+  {
+    "name": "Hello Kitty",
+    "description": "A mouse following hello kitty",
+    "link": "https://leo-hello-kitty.netlify.app",
+    "source": "https://github.com/oleoa/hello-kitty",
+    "stacks": ["vite", "react", "tailwind", "typescript"]
+  }
+]
