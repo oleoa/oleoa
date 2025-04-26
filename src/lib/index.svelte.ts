@@ -1,10 +1,11 @@
 // place files you want to import through the `$lib` alias in this folder.
 export function shuffleArray(array: any[]) {
-  for (let i = array.length - 1; i > 0; i--) {
+  const new_array = [...array];
+  for (let i = new_array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1)); // random index from 0 to i
-    [array[i], array[j]] = [array[j], array[i]]; // swap elements
+    [new_array[i], new_array[j]] = [new_array[j], new_array[i]]; // swap elements
   }
-  return array;
+  return new_array;
 }
 
 import tippy from "tippy.js";
