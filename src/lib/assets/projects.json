@@ -46,6 +46,13 @@
     ]
   },
   {
+    "name": "The Game of Life",
+    "description": "Conway's Game of Life",
+    "link": "https://oleoa-the-game-of-life.netlify.app",
+    "source": "https://github.com/oleoa/the-game-of-life",
+    "stacks": ["svelte", "tailwind", "typescript", "netlify", "git", "github"]
+  },
+  {
     "name": "Portfolio",
     "description": "This portfolio",
     "link": "https://oleoa.netlify.app",
