@@ -25,7 +25,7 @@
   {
     "name": "Lordle",
     "description": "Worlde game",
-    "link": "https://lordle.netlify.app/",
+    "link": "https://lordle.oleoa.dev",
     "source": "https://github.com/oleoa/lordle",
     "stacks": ["vite", "netlify", "tailwind", "typescript", "git", "github"]
   },
@@ -48,21 +48,28 @@
   {
     "name": "The Game of Life",
     "description": "Conway's Game of Life",
-    "link": "https://oleoa-the-game-of-life.netlify.app",
+    "link": "https://thegameoflife.oleoa.dev",
+    "source": "https://github.com/oleoa/the-game-of-life",
+    "stacks": ["svelte", "tailwind", "typescript", "netlify", "git", "github"]
+  },
+  {
+    "name": "Cidade Dorme",
+    "description": "Simple Werewolf game to play with friends in person",
+    "link": "https://cidadedorme.oleoa.dev",
     "source": "https://github.com/oleoa/the-game-of-life",
     "stacks": ["svelte", "tailwind", "typescript", "netlify", "git", "github"]
   },
   {
     "name": "Portfolio",
     "description": "This portfolio",
-    "link": "https://oleoa.netlify.app",
+    "link": "https://oleoa.dev",
     "source": "https://github.com/oleoa/oleoa",
     "stacks": ["svelte", "tailwind", "typescript", "netlify", "git", "github"]
   },
   {
     "name": "Hello Kitty",
     "description": "A mouse following hello kitty",
-    "link": "https://leo-hello-kitty.netlify.app",
+    "link": "https://hellokitty.oleoa.dev",
     "source": "https://github.com/oleoa/hello-kitty",
     "stacks": ["vite", "react", "tailwind", "typescript", "git", "github"]
   }
