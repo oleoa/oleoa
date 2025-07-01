@@ -1,0 +1,76 @@
+[
+  {
+    "name": "Achieve Rent a Car",
+    "description": "A website for a car rental company",
+    "link": "https://achieverentacar.com/en",
+    "source": "https://github.com/oleoa/achieve-astro",
+    "stacks": ["astro", "netlify", "tailwind", "typescript", "git", "github"]
+  },
+  {
+    "name": "Dashboard Achieve Rent a Car",
+    "description": "The private dashboard for the car rental company",
+    "link": null,
+    "source": null,
+    "stacks": [
+      "nextjs",
+      "react",
+      "typescript",
+      "tailwind",
+      "redis",
+      "github",
+      "git",
+      "netlify"
+    ]
+  },
+  {
+    "name": "Lordle",
+    "description": "Worlde game",
+    "link": "https://lordle.oleoa.dev",
+    "source": "https://github.com/oleoa/lordle",
+    "stacks": ["vite", "netlify", "tailwind", "typescript", "git", "github"]
+  },
+  {
+    "name": "Chat",
+    "description": "A simple chat app",
+    "link": "https://oleoa-chat.netlify.app",
+    "source": "https://github.com/oleoa/chat",
+    "stacks": [
+      "nextjs",
+      "tailwind",
+      "zod",
+      "supabase",
+      "react",
+      "typescript",
+      "git",
+      "github"
+    ]
+  },
+  {
+    "name": "The Game of Life",
+    "description": "Conway's Game of Life",
+    "link": "https://thegameoflife.oleoa.dev",
+    "source": "https://github.com/oleoa/the-game-of-life",
+    "stacks": ["svelte", "tailwind", "typescript", "netlify", "git", "github"]
+  },
+  {
+    "name": "Cidade Dorme",
+    "description": "Simple Werewolf game to play with friends in person",
+    "link": "https://cidadedorme.oleoa.dev",
+    "source": "https://github.com/oleoa/the-game-of-life",
+    "stacks": ["svelte", "tailwind", "typescript", "netlify", "git", "github"]
+  },
+  {
+    "name": "Portfolio",
+    "description": "This portfolio",
+    "link": "https://oleoa.dev",
+    "source": "https://github.com/oleoa/oleoa",
+    "stacks": ["svelte", "tailwind", "typescript", "netlify", "git", "github"]
+  },
+  {
+    "name": "Hello Kitty",
+    "description": "A mouse following hello kitty",
+    "link": "https://hellokitty.oleoa.dev",
+    "source": "https://github.com/oleoa/hello-kitty",
+    "stacks": ["vite", "react", "tailwind", "typescript", "git", "github"]
+  }
+]

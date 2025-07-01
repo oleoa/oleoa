@@ -1,0 +1,122 @@
+[
+  {
+    "name": "React",
+    "src": "react",
+    "href": "https://react.dev/"
+  },
+  {
+    "name": "Svelte",
+    "src": "svelte",
+    "href": "https://svelte.dev/"
+  },
+  {
+    "name": "Tailwind",
+    "src": "tailwind",
+    "href": "https://tailwindcss.com/"
+  },
+  {
+    "name": "NextJs",
+    "src": "nextjs",
+    "href": "https://nextjs.org/"
+  },
+  {
+    "name": "Git",
+    "src": "git",
+    "href": "https://git-scm.com/"
+  },
+  {
+    "name": "Github",
+    "src": "github",
+    "href": "https://github.com/"
+  },
+  {
+    "name": "Typescript",
+    "src": "typescript",
+    "href": "https://www.typescriptlang.org/"
+  },
+  {
+    "name": "Javascript",
+    "src": "javascript",
+    "href": "https://developer.mozilla.org/en-US/docs/Web/JavaScript"
+  },
+  {
+    "name": "Python",
+    "src": "python",
+    "href": "https://www.python.org/"
+  },
+  {
+    "name": "NodeJs",
+    "src": "nodejs",
+    "href": "https://nodejs.org/en/"
+  },
+  {
+    "name": "Deno",
+    "src": "deno",
+    "href": "https://deno.com/"
+  },
+  {
+    "name": "Zod",
+    "src": "zod",
+    "href": "https://zod.dev/"
+  },
+  {
+    "name": "PHP",
+    "src": "php",
+    "href": "https://www.php.net/"
+  },
+  {
+    "name": "Laravel",
+    "src": "laravel",
+    "href": "https://laravel.com/"
+  },
+  {
+    "name": "Vite",
+    "src": "vite",
+    "href": "https://vitejs.dev/"
+  },
+  {
+    "name": "Docker",
+    "src": "docker",
+    "href": "https://www.docker.com/"
+  },
+  {
+    "name": "Shadcn/ui",
+    "src": "shadcnui",
+    "href": "https://ui.shadcn.com/"
+  },
+  {
+    "name": "Netlify",
+    "src": "netlify",
+    "href": "https://www.netlify.com/"
+  },
+  {
+    "name": "Astro",
+    "src": "astro",
+    "href": "https://astro.build/"
+  },
+  {
+    "name": "Postgresql",
+    "src": "postgresql",
+    "href": "https://www.postgresql.org/"
+  },
+  {
+    "name": "Notion",
+    "src": "notion",
+    "href": "https://www.notion.so/"
+  },
+  {
+    "name": "Redis",
+    "src": "redis",
+    "href": "https://redis.io/"
+  },
+  {
+    "name": "Clerk",
+    "src": "clerk",
+    "href": "https://clerk.com/"
+  },
+  {
+    "name": "Supabase",
+    "src": "supabase",
+    "href": "https://supabase.com/"
+  }
+]
