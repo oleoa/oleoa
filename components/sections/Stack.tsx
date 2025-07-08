@@ -4,7 +4,11 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import {
   Card,
   CardContent,
@@ -15,9 +19,7 @@ import {
 import Me from "@/lib/assets/images/me.png";
 import Github from "@/public/stacks/github.svg";
 
-export default function Information({ stacks }: { stacks: any }) {
-  const [copied, setCopied] = useState(false);
-
+export default function Stack({ stacks }: { stacks: any }) {
   return (
     <div className="margin py-20 flex md:flex-row flex-col gap-8">
       <Card>
@@ -49,26 +51,24 @@ export default function Information({ stacks }: { stacks: any }) {
             <span className="animate-pulse flex items-center justify-center w-2 h-2 rounded-full bg-green-600"></span>
             <p>Avaiable for work</p>
           </div>
-          <button
-            className="flex flex-row md:gap-4 gap-2 border-2 px-4 py-2 rounded-lg items-center text-sm cursor-pointer"
-            onClick={() => {
-              navigator.clipboard.writeText(
-                "leonardo.abreu.de.paulo@gmail.com"
-              );
-              setCopied(true);
-              setTimeout(() => {
-                setCopied(false);
-              }, 500);
-            }}
-            aria-label="Copy email"
-          >
-            <p>leonardo.abreu.de.paulo@gmail.com</p>
-            {copied ? (
-              <i className="fa-solid fa-check"></i>
-            ) : (
-              <i className="fa-solid fa-copy"></i>
-            )}
-          </button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                className="flex flex-row md:gap-4 gap-2 border-2 px-4 py-2 rounded-lg items-center text-sm cursor-pointer"
+                onClick={() => {
+                  navigator.clipboard.writeText(
+                    "leonardo.abreu.de.paulo@gmail.com"
+                  );
+                }}
+                aria-label="Copy email"
+              >
+                leonardo.abreu.de.paulo@gmail.com
+              </button>
+            </TooltipTrigger>
+            <TooltipContent hideWhenDetached={false}>
+              <p>Click to copy email</p>
+            </TooltipContent>
+          </Tooltip>
         </CardFooter>
       </Card>
       <div className="space-y-4">
@@ -79,7 +79,7 @@ export default function Information({ stacks }: { stacks: any }) {
         </div>
         <div className="flex flex-wrap md:justify-start justify-center gap-4">
           {stacks.map((item: any) => (
-            <Stack key={item.name} stack={item} />
+            <StackCard key={item.name} stack={item} />
           ))}
         </div>
       </div>
@@ -87,15 +87,22 @@ export default function Information({ stacks }: { stacks: any }) {
   );
 }
 
-function Stack({ stack }: { stack: any }) {
+function StackCard({ stack }: { stack: any }) {
   return (
-    <div className="flex flex-col items-center justify-center">
-      <img
-        src={"/stacks/" + stack.src + ".svg"}
-        alt={stack.name}
-        className="w-10 h-10"
-      />
-      <p>{stack.name}</p>
-    </div>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <a
+          href={stack.href}
+          target="_blank"
+          aria-label="Visit {stack.name} website"
+          className="flex flex-col items-center justify-center p-4 border transition-all duration-300 rounded-lg w-24 h-24 cursor-pointer hover:bg-neutral-200"
+        >
+          <img src={`/stacks/${stack.src}.svg`} alt={stack.name} className="" />
+        </a>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>{stack.name}</p>
+      </TooltipContent>
+    </Tooltip>
   );
 }
