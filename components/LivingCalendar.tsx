@@ -94,7 +94,7 @@ export default function CalendarComponent() {
           {years.map((week, index) => (
             <div key={index} className="grid grid-cols-48 w-full relative">
               <div className="absolute -left-5 text-right border w-5 h-5">
-                {index + 1}
+                {index}
               </div>
               {week.map((type, index) => (
                 <div

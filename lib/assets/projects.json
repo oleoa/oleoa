@@ -64,7 +64,15 @@
     "description": "This portfolio",
     "link": "https://oleoa.dev",
     "source": "https://github.com/oleoa/oleoa",
-    "stacks": ["svelte", "tailwind", "typescript", "netlify", "git", "github"]
+    "stacks": [
+      "nextjs",
+      "react",
+      "tailwind",
+      "typescript",
+      "netlify",
+      "git",
+      "github"
+    ]
   },
   {
     "name": "Hello Kitty",
@@ -72,5 +80,12 @@
     "link": "https://hellokitty.oleoa.dev",
     "source": "https://github.com/oleoa/hello-kitty",
     "stacks": ["vite", "react", "tailwind", "typescript", "git", "github"]
+  },
+  {
+    "name": "LifeTime Calendar",
+    "description": "A calendar to track your life",
+    "link": "https://oleoa.dev/calendar",
+    "source": "https://github.com/oleoa/oleoa",
+    "stacks": ["react", "tailwind", "typescript", "git", "github"]
   }
 ]
