@@ -6,7 +6,11 @@ import { Input } from "@/components/ui/input";
 
 type Type = "before_birthday" | "lived" | "to_live";
 
-export default function CalendarComponent() {
+export default function CalendarComponent({
+  birthday: default_birthday,
+}: {
+  birthday: string;
+}) {
   const months = [
     "January",
     "February",
@@ -22,18 +26,21 @@ export default function CalendarComponent() {
     "December",
   ];
 
-  const [birthday, setBirthday] = useState<Date>(new Date("2005-12-24"));
+  const [birthday, setBirthday] = useState<Date>(
+    new Date(default_birthday || "2005-12-24")
+  );
   const [yearsToLive, setYearsToLive] = useState<number>(80);
 
   const [years, setYears] = useState<Type[][]>(
-    Array.from({ length: yearsToLive }, () =>
+    Array.from({ length: yearsToLive + 1 }, () =>
       Array.from({ length: 48 }, () => "to_live")
     )
   );
+
   useEffect(() => {
     setYears([]);
     const today = new Date();
-    Array.from({ length: yearsToLive }, (_, i) => i).forEach((year) => {
+    Array.from({ length: yearsToLive + 1 }, (_, i) => i).forEach((year) => {
       setYears((prev) => [
         ...prev,
         Array.from({ length: 48 }, (_, week) => {
@@ -56,32 +63,34 @@ export default function CalendarComponent() {
   }, [birthday, yearsToLive]);
 
   return (
-    <div className="flex flex-row items-start justify-between h-full w-full px-32 py-8">
-      <div className="flex flex-col items-center justify-center gap-2 w-1/3">
-        <h1 className="text-2xl font-bold text-center">Living Calendar</h1>
-        <h2 className="text-sm text-start">Select Your Birthday</h2>
-        <Calendar
-          mode="single"
-          selected={birthday}
-          onSelect={setBirthday}
-          className="rounded-lg border"
-          captionLayout="dropdown"
-          defaultMonth={birthday}
-          required
-        />
-        <h2 className="text-sm text-start">
-          How many years do you expect to live?
-        </h2>
-        <Input
-          type="number"
-          name="years"
-          min={0}
-          max={120}
-          defaultValue={yearsToLive}
-          onChange={(e) => setYearsToLive(Number(e.target.value))}
-          className="w-fit"
-        />
-      </div>
+    <div className="flex flex-row items-start justify-between h-full w-full px-32 py-8 bg-transparent">
+      {!default_birthday && (
+        <div className="flex flex-col items-center justify-center gap-2 w-1/3">
+          <h1 className="text-2xl font-bold text-center">Living Calendar</h1>
+          <h2 className="text-sm text-start">Select Your Birthday</h2>
+          <Calendar
+            mode="single"
+            selected={birthday}
+            onSelect={setBirthday}
+            className="rounded-lg border"
+            captionLayout="dropdown"
+            defaultMonth={birthday}
+            required
+          />
+          <h2 className="text-sm text-start">
+            How many years do you expect to live?
+          </h2>
+          <Input
+            type="number"
+            name="years"
+            min={0}
+            max={120}
+            defaultValue={yearsToLive}
+            onChange={(e) => setYearsToLive(Number(e.target.value))}
+            className="w-fit"
+          />
+        </div>
+      )}
       <div className="w-full">
         <div className="grid grid-cols-12 w-full">
           {months.map((month) => (
