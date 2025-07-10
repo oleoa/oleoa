@@ -18,5 +18,13 @@ export default async function CalendarPage({
     Number(slug[0].split("-")[2]) > 0 &&
     Number(slug[0].split("-")[2]) <= 31;
   const birthday = isBirthday ? slug[0] : "";
-  return <LivingCalendar birthday={birthday} />;
+  const yearsToLive = slug ? (slug[1] ? Number(slug[1]) : 0) : 0;
+  const isNotion = slug ? slug.includes("notion") : false;
+  return (
+    <LivingCalendar
+      birthday={birthday}
+      yearsToLive={yearsToLive}
+      isNotion={isNotion}
+    />
+  );
 }
