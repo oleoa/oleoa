@@ -82,9 +82,16 @@
     "stacks": ["vite", "react", "tailwind", "typescript", "git", "github"]
   },
   {
+    "name": "Chess",
+    "description": "A simple one player chess game",
+    "link": "https://oleoa.dev/projects/chess",
+    "source": "https://github.com/oleoa/chess",
+    "stacks": ["vite", "react", "tailwind", "typescript", "git", "github"]
+  },
+  {
     "name": "LifeTime Calendar",
     "description": "A calendar to track your life",
-    "link": "https://oleoa.dev/calendar",
+    "link": "https://oleoa.dev/projects/calendar",
     "source": "https://github.com/oleoa/oleoa",
     "stacks": ["react", "tailwind", "typescript", "git", "github"]
   }

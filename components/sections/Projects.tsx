@@ -9,30 +9,44 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 import Github from "@/public/stacks/github.svg";
 import { Globe } from "lucide-react";
 
 export default function Projects({ projects }: { projects: any[] }) {
   return (
-    <div className="py-20 margin flex flex-col gap-8">
-      <div className="flex flex-row items-center gap-4">
-        <h2 className="text-4xl font-bold md:text-start text-center">
-          Projects
-        </h2>
-      </div>
-      <div className="flex flex-row flex-wrap gap-4 overflow-hidden">
-        {projects.map((project, index) => (
-          <Project project={project} key={index} />
-        ))}
-      </div>
+    <div className="px-24 py-12 flex">
+      <Carousel
+        className="w-full"
+        opts={{
+          align: "center",
+          loop: true,
+        }}
+      >
+        <CarouselContent>
+          {projects.map((project, index) => (
+            <CarouselItem key={index} className="basis-1/3">
+              <Project project={project} key={index} />
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious />
+        <CarouselNext />
+      </Carousel>
     </div>
   );
 }
 
 function Project({ project }: { project: any }) {
   return (
-    <Card className="w-fit px-2">
+    <Card className="w-full h-full px-2">
       <CardHeader>
         <div className="flex flex-row items-center justify-between gap-2">
           <h3 className="text-2xl font-bold">{project.name}</h3>
