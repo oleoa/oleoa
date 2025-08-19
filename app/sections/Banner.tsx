@@ -2,7 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 
-export default function Banner() {
+export default function Banner({
+  handleProjectsScroll,
+}: {
+  handleProjectsScroll: () => void;
+}) {
   return (
     <div className="flex flex-col gap-8 items-center justify-start md:pb-20 md:pt-36 pt-16 margin">
       <h1 className="md:text-8xl text-5xl italic font-bold flex flex-col">
@@ -17,7 +21,7 @@ export default function Banner() {
       <div className="flex flex-row gap-4">
         <Button
           onClick={() => {
-            console.log("contact me");
+            window.open("https://www.linkedin.com/in/oleoa/", "_blank");
           }}
         >
           Contact Me
@@ -25,7 +29,7 @@ export default function Banner() {
         <Button
           variant="outline"
           onClick={() => {
-            console.log("projects");
+            handleProjectsScroll();
           }}
         >
           See Projects

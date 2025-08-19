@@ -3,7 +3,6 @@
 
 "use client";
 
-import Image from "next/image";
 import {
   Tooltip,
   TooltipContent,
@@ -15,13 +14,14 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 
-import Me from "@/lib/assets/images/me.png";
-import Github from "@/public/stacks/github.svg";
+import Me from "@/lib/assets/me.png";
+import { GithubIcon, LinkedinIcon } from "lucide-react";
 
-export default function Stack({ stacks }: { stacks: any }) {
+export default function Stack({ stacks }: { stacks: any[] | undefined }) {
   return (
-    <div className="margin py-20 flex md:flex-row flex-col gap-8">
+    <div className="margin py-20 gap-8 md:grid md:grid-cols-3 flex flex-col">
       <Card>
         <CardContent>
           <img
@@ -32,11 +32,28 @@ export default function Stack({ stacks }: { stacks: any }) {
         </CardContent>
         <CardHeader>
           <div className="rounded-lg flex flex-col items-start gap-4 h-fit">
-            <div className="flex flex-row gap-4 items-center">
-              <h2 className="text-2xl font-bold">Leonardo Abreu</h2>
-              <a href="https://github.com/oleoa" target="_blank">
-                <Image src={Github} alt="Github" className="w-6 h-6" />
-              </a>
+            <div className="flex flex-row gap-2 items-center">
+              <h2 className="text-2xl font-bold pr-2">Leonardo Abreu</h2>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <a href="https://github.com/oleoa" target="_blank">
+                    <LinkedinIcon />
+                  </a>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Open my LinkedIn Account</p>
+                </TooltipContent>
+              </Tooltip>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <a href="https://github.com/oleoa" target="_blank">
+                    <GithubIcon />
+                  </a>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Open my Github Account</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
             <div className="flex flex-col gap-2">
               <p>
@@ -51,36 +68,18 @@ export default function Stack({ stacks }: { stacks: any }) {
             <span className="animate-pulse flex items-center justify-center w-2 h-2 rounded-full bg-green-600"></span>
             <p>Avaiable for work</p>
           </div>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button
-                className="flex flex-row md:gap-4 gap-2 border-2 px-4 py-2 rounded-lg items-center text-sm cursor-pointer"
-                onClick={() => {
-                  navigator.clipboard.writeText(
-                    "leonardo.abreu.de.paulo@gmail.com"
-                  );
-                }}
-                aria-label="Copy email"
-              >
-                leonardo.abreu.de.paulo@gmail.com
-              </button>
-            </TooltipTrigger>
-            <TooltipContent hideWhenDetached={false}>
-              <p>Click to copy email</p>
-            </TooltipContent>
-          </Tooltip>
         </CardFooter>
       </Card>
-      <div className="space-y-4">
-        <div className="flex flex-row items-center gap-4">
-          <h2 className="text-4xl font-bold md:text-start text-center">
-            Stack
-          </h2>
-        </div>
+      <div className="space-y-4 md:col-span-2">
+        <h2 className="text-4xl font-bold md:text-start text-center">Stack</h2>
         <div className="flex flex-wrap md:justify-start justify-center gap-4">
-          {stacks.map((item: any) => (
-            <StackCard key={item.name} stack={item} />
-          ))}
+          {stacks
+            ? stacks.map((item: any) => (
+                <StackCard key={item.name} stack={item} />
+              ))
+            : Array.from({ length: 24 }).map((_, i: number) => (
+                <Skeleton key={i} className="h-24 w-24 rounded-lg" />
+              ))}
         </div>
       </div>
     </div>

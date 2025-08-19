@@ -1,16 +1,28 @@
-import Banner from "@/components/sections/Banner";
-import Stack from "@/components/sections/Stack";
-import Projects from "@/components/sections/Projects";
+"use client";
 
-export default async function Home() {
-  const projects = (await import("@/lib/assets/projects.json")).default;
-  const stack = (await import("@/lib/assets/stack.json")).default;
+import Banner from "@/app/sections/Banner";
+import Stack from "@/app/sections/Stack";
+import Projects from "@/app/sections/Projects";
+
+import { useQuery } from "convex/react";
+import { api } from "../convex/_generated/api";
+
+import { useRef } from "react";
+
+export default function Home() {
+  const targetRef = useRef<HTMLDivElement | null>(null);
+  const handleProjectsScroll = () => {
+    targetRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const projects = useQuery(api.projects.get);
+  const stack = useQuery(api.stack.get);
 
   return (
     <main>
-      <Banner />
+      <Banner handleProjectsScroll={handleProjectsScroll} />
       <Stack stacks={stack} />
-      <Projects projects={projects} />
+      <Projects projects={projects} ref={targetRef} />
     </main>
   );
 }
