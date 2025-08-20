@@ -22,7 +22,7 @@ export const add = mutation({
       description,
       link,
       source,
-      stacks: [],
+      stack: [],
     });
   },
 });
@@ -42,6 +42,40 @@ export const update = mutation({
       description,
       link,
       source,
+    });
+  },
+});
+
+export const addStack = mutation({
+  args: {
+    id: v.id("projects"),
+    stack: v.id("stacks"),
+  },
+  handler: async (ctx, args) => {
+    const { id, stack } = args;
+    const project = await ctx.db.get(id);
+    if (!project) throw new Error("Project not found");
+    const existing = Array.isArray(project.stack) ? project.stack : [];
+    if (existing.includes(stack)) return null;
+    return await ctx.db.patch(id, {
+      stack: [...existing, stack],
+    });
+  },
+});
+
+export const removeStack = mutation({
+  args: {
+    id: v.id("projects"),
+    stack: v.id("stacks"),
+  },
+  handler: async (ctx, args) => {
+    const { id, stack } = args;
+    const project = await ctx.db.get(id);
+    if (!project) throw new Error("Project not found");
+    const existing = Array.isArray(project.stack) ? project.stack : [];
+    if (!existing.includes(stack)) return null;
+    return await ctx.db.patch(id, {
+      stack: existing.filter((item) => item !== stack),
     });
   },
 });

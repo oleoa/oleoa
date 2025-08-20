@@ -1,0 +1,98 @@
+[
+  {
+    "name": "React",
+    "href": "https://react.dev/"
+  },
+  {
+    "name": "Svelte",
+    "href": "https://svelte.dev/"
+  },
+  {
+    "name": "Tailwind",
+    "href": "https://tailwindcss.com/"
+  },
+  {
+    "name": "NextJs",
+    "href": "https://nextjs.org/"
+  },
+  {
+    "name": "Git",
+    "href": "https://git-scm.com/"
+  },
+  {
+    "name": "Github",
+    "href": "https://github.com/"
+  },
+  {
+    "name": "Typescript",
+    "href": "https://www.typescriptlang.org/"
+  },
+  {
+    "name": "Javascript",
+    "href": "https://developer.mozilla.org/en-US/docs/Web/JavaScript"
+  },
+  {
+    "name": "Python",
+    "href": "https://www.python.org/"
+  },
+  {
+    "name": "NodeJs",
+    "href": "https://nodejs.org/en/"
+  },
+  {
+    "name": "Deno",
+    "href": "https://deno.com/"
+  },
+  {
+    "name": "Zod",
+    "href": "https://zod.dev/"
+  },
+  {
+    "name": "PHP",
+    "href": "https://www.php.net/"
+  },
+  {
+    "name": "Laravel",
+    "href": "https://laravel.com/"
+  },
+  {
+    "name": "Vite",
+    "href": "https://vitejs.dev/"
+  },
+  {
+    "name": "Docker",
+    "href": "https://www.docker.com/"
+  },
+  {
+    "name": "Shadcn/ui",
+    "href": "https://ui.shadcn.com/"
+  },
+  {
+    "name": "Netlify",
+    "href": "https://www.netlify.com/"
+  },
+  {
+    "name": "Astro",
+    "href": "https://astro.build/"
+  },
+  {
+    "name": "Postgresql",
+    "href": "https://www.postgresql.org/"
+  },
+  {
+    "name": "Notion",
+    "href": "https://www.notion.so/"
+  },
+  {
+    "name": "Redis",
+    "href": "https://redis.io/"
+  },
+  {
+    "name": "Clerk",
+    "href": "https://clerk.com/"
+  },
+  {
+    "name": "Supabase",
+    "href": "https://supabase.com/"
+  }
+]

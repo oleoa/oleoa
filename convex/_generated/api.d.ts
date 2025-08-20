@@ -14,7 +14,7 @@ import type {
   FunctionReference,
 } from "convex/server";
 import type * as projects from "../projects.js";
-import type * as stack from "../stack.js";
+import type * as stacks from "../stacks.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -26,7 +26,7 @@ import type * as stack from "../stack.js";
  */
 declare const fullApi: ApiFromModules<{
   projects: typeof projects;
-  stack: typeof stack;
+  stacks: typeof stacks;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,

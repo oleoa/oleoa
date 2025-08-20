@@ -1,7 +1,7 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { MoreHorizontal } from "lucide-react";
+import { MoreHorizontal, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -31,22 +31,35 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 export type Project = {
-  _id: string;
+  _id: Id<"projects">;
   name: string;
   description: string;
   link: string | null;
   source: string | null;
-  stacks: string[];
+  stack: Id<"stacks">[];
 };
 
 export const columns: ColumnDef<Project>[] = [
@@ -107,6 +120,15 @@ function UpdateProjectDialog({
     link,
     source,
   });
+  useEffect(() => {
+    const { name, description, link, source } = project;
+    setProjectState({
+      name,
+      description,
+      link,
+      source,
+    });
+  }, [project]);
   const updateProject = useMutation(api.projects.update);
   const handleUpdate = () => {
     updateProject({ ...projectState, id: project._id as Id<"projects"> });
@@ -166,6 +188,13 @@ function UpdateProjectDialog({
                   }}
                 />
               </div>
+              <div className="flex flex-col items-center justify-between gap-4">
+                <AddStackPopover project={project} />
+                <StackList
+                  defaultStacks={project.stack}
+                  projectId={project._id}
+                />
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <DialogTrigger asChild>
                   <Button variant="outline">Cancel</Button>
@@ -179,6 +208,78 @@ function UpdateProjectDialog({
         </DialogHeader>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function StackList({
+  defaultStacks,
+  projectId,
+}: {
+  defaultStacks: Id<"stacks">[];
+  projectId: Id<"projects">;
+}) {
+  const stacks = useQuery(api.stacks.getList, { ids: defaultStacks });
+  const removeStack = useMutation(api.projects.removeStack);
+  return (
+    <div className="flex flex-wrap gap-4">
+      {stacks &&
+        stacks.map((stack, i) => (
+          <div key={i} className="p-4 border-2 rounded-lg relative">
+            <div className="absolute top-0 right-0 py-1">
+              <button
+                onClick={() => removeStack({ id: projectId, stack: stack._id })}
+              >
+                <Trash2 className="h-3 text-red-500 cursor-pointer" />
+              </button>
+            </div>
+            {stack.name}
+          </div>
+        ))}
+    </div>
+  );
+}
+
+function AddStackPopover({ project }: { project: Project }) {
+  const [open, setOpen] = useState(false);
+  const stacks = useQuery(api.stacks.get);
+  const addStack = useMutation(api.projects.addStack);
+  return (
+    <div className="flex items-center space-x-4 z-50">
+      <p className="text-muted-foreground text-sm">Stack</p>
+      <Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button variant="outline" className="w-[150px] justify-start">
+            + Add stack
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="p-0" side="right" align="start">
+          <Command>
+            <CommandInput placeholder="Add stack..." />
+            <CommandList>
+              <CommandEmpty>No results found.</CommandEmpty>
+              <CommandGroup>
+                {stacks &&
+                  stacks.map((stack) => (
+                    <CommandItem
+                      key={stack._id}
+                      value={stack.name}
+                      onSelect={() => {
+                        addStack({
+                          id: project._id as Id<"projects">,
+                          stack: stack._id,
+                        });
+                        setOpen(false);
+                      }}
+                    >
+                      {stack.name}
+                    </CommandItem>
+                  ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    </div>
   );
 }
 

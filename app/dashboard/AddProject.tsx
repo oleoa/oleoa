@@ -97,7 +97,7 @@ export default function AddProject() {
                     <Button variant="outline">Cancel</Button>
                   </DialogTrigger>
                   <DialogTrigger asChild>
-                    <Button onClick={handleAdd}>Update</Button>
+                    <Button onClick={handleAdd}>Create</Button>
                   </DialogTrigger>
                 </div>
               </div>

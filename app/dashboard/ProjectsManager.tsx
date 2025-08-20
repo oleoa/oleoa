@@ -12,7 +12,7 @@ export default function ProjectsManager() {
   return (
     <div>
       <DataTable columns={columns} data={projects ?? []} />
-      <AddProject />
+      {projects != undefined && <AddProject />}
     </div>
   );
 }

@@ -16,7 +16,7 @@ export default function Home() {
   };
 
   const projects = useQuery(api.projects.get);
-  const stack = useQuery(api.stack.get);
+  const stack = useQuery(api.stacks.get);
 
   return (
     <main>

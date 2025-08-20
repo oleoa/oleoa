@@ -53,7 +53,7 @@ function Project({ project }: { project: any }) {
       <CardFooter>
         <div className="flex justify-between w-full">
           <div className="flex gap-2">
-            {project.stacks.map((stack: string, i: number) => (
+            {project.stack.map((stack: string, i: number) => (
               <Tooltip key={i}>
                 <TooltipTrigger asChild>
                   <img
