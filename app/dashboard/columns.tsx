@@ -227,7 +227,12 @@ function StackList({
           <div key={i} className="p-4 border-2 rounded-lg relative">
             <div className="absolute top-0 right-0 py-1">
               <button
-                onClick={() => removeStack({ id: projectId, stack: stack._id })}
+                onClick={() =>
+                  removeStack({
+                    id: projectId,
+                    stack: stack._id as Id<"stacks">,
+                  })
+                }
               >
                 <Trash2 className="h-3 text-red-500 cursor-pointer" />
               </button>

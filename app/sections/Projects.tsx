@@ -16,6 +16,9 @@ import { Globe } from "lucide-react";
 import { toTitleCase } from "@/lib/utils";
 import { Ref } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Stack } from "../dashboard/interfaces";
+import { api } from "@/convex/_generated/api";
+import { useQuery } from "convex/react";
 
 export default function Projects({
   projects,
@@ -41,6 +44,7 @@ export default function Projects({
 }
 
 function Project({ project }: { project: any }) {
+  const stacks = useQuery(api.stacks.getList, { ids: project.stack });
   return (
     <Card className="w-full min-h-46 flex flex-col justify-between">
       <CardHeader>
@@ -53,21 +57,26 @@ function Project({ project }: { project: any }) {
       <CardFooter>
         <div className="flex justify-between w-full">
           <div className="flex gap-2">
-            {project.stack.map((stack: string, i: number) => (
-              <Tooltip key={i}>
-                <TooltipTrigger asChild>
-                  <img
-                    src={`/stacks/${stack}.svg`}
-                    alt={stack}
-                    className="w-6"
-                    key={stack}
-                  />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{toTitleCase(stack)}</p>
-                </TooltipContent>
-              </Tooltip>
-            ))}
+            {stacks &&
+              stacks.map((stack: Stack, i: number) => (
+                <Tooltip key={i}>
+                  <TooltipTrigger asChild>
+                    {stack.image ? (
+                      <img
+                        src={stack.image}
+                        alt={stack.name}
+                        className="w-6"
+                        key={stack.name}
+                      />
+                    ) : (
+                      stack.name
+                    )}
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{toTitleCase(stack.name)}</p>
+                  </TooltipContent>
+                </Tooltip>
+              ))}
           </div>
           <div className="flex flex-row items-center justify-center h-full gap-2 w-fit">
             {project.link && (

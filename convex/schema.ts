@@ -5,6 +5,7 @@ export default defineSchema({
   stacks: defineTable({
     name: v.string(),
     href: v.string(),
+    image: v.optional(v.id("_storage")),
   }),
   projects: defineTable({
     name: v.string(),

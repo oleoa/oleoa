@@ -96,7 +96,7 @@ function StackCard({ stack }: { stack: any }) {
           aria-label="Visit {stack.name} website"
           className="flex flex-col items-center justify-center p-4 border transition-all duration-300 rounded-lg w-24 h-24 cursor-pointer hover:bg-neutral-200"
         >
-          <img src={`/stacks/${stack.src}.svg`} alt={stack.name} className="" />
+          <img src={stack.image} alt={stack.name} />
         </a>
       </TooltipTrigger>
       <TooltipContent>

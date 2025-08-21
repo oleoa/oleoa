@@ -1,4 +1,5 @@
-import { ConvexClientProvider } from "@/components/ConvexClientProvider";
+import { ClerkProvider } from "@clerk/nextjs";
+import ConvexClientProvider from "@/components/ConvexClientProvider";
 
 import type { Metadata } from "next";
 import "./globals.css";
@@ -14,10 +15,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ConvexClientProvider>
-      <html lang="en">
-        <body className="antialiased bg-transparent">{children}</body>
-      </html>
-    </ConvexClientProvider>
+    <ClerkProvider>
+      <ConvexClientProvider>
+        <html lang="en">
+          <body className="antialiased bg-transparent">{children}</body>
+        </html>
+      </ConvexClientProvider>
+    </ClerkProvider>
   );
 }

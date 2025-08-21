@@ -1,14 +1,11 @@
-import { UserButton } from "@clerk/nextjs";
-
 import StacksManager from "./StacksManager";
 import ProjectsManager from "./ProjectsManager";
+import Navbar from "@/components/Navbar";
 
-export default async function Dashboard() {
+export default function Dashboard() {
   return (
-    <main className="py-14 margin space-y-4">
-      <div className="fixed top-0 right-0 w-full h-14 py-4 flex justify-end margin">
-        <UserButton />
-      </div>
+    <main className="py-18 margin space-y-4">
+      <Navbar />
       <StacksManager />
       <ProjectsManager />
     </main>

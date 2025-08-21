@@ -4,10 +4,11 @@ import Banner from "@/app/sections/Banner";
 import Stack from "@/app/sections/Stack";
 import Projects from "@/app/sections/Projects";
 
-import { useQuery } from "convex/react";
+import { Authenticated, useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
 
 import { useRef } from "react";
+import Navbar from "@/components/Navbar";
 
 export default function Home() {
   const targetRef = useRef<HTMLDivElement | null>(null);
@@ -20,6 +21,9 @@ export default function Home() {
 
   return (
     <main>
+      <Authenticated>
+        <Navbar />
+      </Authenticated>
       <Banner handleProjectsScroll={handleProjectsScroll} />
       <Stack stacks={stack} />
       <Projects projects={projects} ref={targetRef} />

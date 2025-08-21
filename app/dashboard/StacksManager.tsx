@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { api } from "@/convex/_generated/api";
@@ -98,9 +99,26 @@ function StackCard({ stack }: { stack: Stack }) {
   }, [stack]);
 
   const updateStack = useMutation(api.stacks.update);
-  const handleUpdate = () => {
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const generateUploadUrl = useMutation(api.stacks.generateUploadUrl);
+  const handleUpdate = async () => {
     const { _id, name, href } = stackState;
-    updateStack({ id: _id as Id<"stacks">, name, href });
+
+    // Step 1: Get a short-lived upload URL
+    const postUrl = await generateUploadUrl();
+
+    // Step 2: POST the file to the URL
+    const result = await fetch(postUrl, {
+      method: "POST",
+      headers: { "Content-Type": selectedImage!.type },
+      body: selectedImage,
+    });
+    const { storageId } = await result.json();
+
+    // Step 3: Save the newly allocated storage id to the database
+    updateStack({ id: _id as Id<"stacks">, name, href, image: storageId });
+
+    setSelectedImage(null);
   };
 
   const deleteStack = useMutation(api.stacks.destroy);
@@ -113,7 +131,11 @@ function StackCard({ stack }: { stack: Stack }) {
       <Dialog>
         <DialogTrigger asChild>
           <div className="rounded-lg w-24 h-24 border-2 flex items-center justify-center hover:bg-neutral-200 transition-all duration-300 cursor-pointer">
-            {stack.name}
+            {stack.image ? (
+              <img src={stack.image} alt={stack.name} className="p-4" />
+            ) : (
+              stack.name
+            )}
           </div>
         </DialogTrigger>
         <DialogContent>
@@ -136,6 +158,16 @@ function StackCard({ stack }: { stack: Stack }) {
                     value={stackState.href}
                     onChange={(e) =>
                       setStackState({ ...stackState, href: e.target.value })
+                    }
+                  />
+                </div>
+                <div className="flex items-center justify-center w-full gap-4">
+                  <p>Image:</p>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={(event) =>
+                      setSelectedImage(event.target.files![0])
                     }
                   />
                 </div>
