@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import Me from "@/lib/assets/me.png";
+import Me from "@/lib/assets/me.jpeg";
 import { GithubIcon, LinkedinIcon } from "lucide-react";
 
 export default function Stack({ stacks }: { stacks: any[] | undefined }) {
