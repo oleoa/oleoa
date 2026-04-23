@@ -1,32 +1,25 @@
-"use client";
+import PageFrame from "@/components/editorial/PageFrame";
+import Hero from "@/app/sections/Hero";
+import Sobre from "@/app/sections/Sobre";
+import Trabalhos from "@/app/sections/Trabalhos";
+import Experimentos from "@/app/sections/Experimentos";
+import Contato from "@/app/sections/Contato";
+import { listProjects, listStacks } from "@/db/queries";
+import { auth } from "@/auth";
 
-import Banner from "@/app/sections/Banner";
-import Stack from "@/app/sections/Stack";
-import Projects from "@/app/sections/Projects";
-
-import { Authenticated, useQuery } from "convex/react";
-import { api } from "../convex/_generated/api";
-
-import { useRef } from "react";
-import Navbar from "@/components/Navbar";
-
-export default function Home() {
-  const targetRef = useRef<HTMLDivElement | null>(null);
-  const handleProjectsScroll = () => {
-    targetRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  const projects = useQuery(api.projects.get);
-  const stack = useQuery(api.stacks.get);
-
+export default async function Home() {
+  const [stacks, projects, session] = await Promise.all([
+    listStacks(),
+    listProjects(),
+    auth(),
+  ]);
   return (
-    <main>
-      <Authenticated>
-        <Navbar />
-      </Authenticated>
-      <Banner handleProjectsScroll={handleProjectsScroll} />
-      <Stack stacks={stack} />
-      <Projects projects={projects} ref={targetRef} />
-    </main>
+    <PageFrame session={session?.user ? { email: session.user.email ?? null } : null}>
+      <Hero />
+      <Sobre stacks={stacks} />
+      <Trabalhos projects={projects} />
+      <Experimentos />
+      <Contato />
+    </PageFrame>
   );
 }
