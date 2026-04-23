@@ -1,18 +1,23 @@
 "use client";
 
-import { columns } from "./columns";
+import { useMemo } from "react";
+import { buildColumns } from "./columns";
 import { DataTable } from "./data-table";
-
-import { useQuery } from "convex/react";
-import { api } from "../../convex/_generated/api";
 import AddProject from "./AddProject";
+import type { Project, Stack } from "@/db/types";
 
-export default function ProjectsManager() {
-  const projects = useQuery(api.projects.get);
+export default function ProjectsManager({
+  initialProjects,
+  allStacks,
+}: {
+  initialProjects: Project[];
+  allStacks: Stack[];
+}) {
+  const columns = useMemo(() => buildColumns({ allStacks }), [allStacks]);
   return (
     <div>
-      <DataTable columns={columns} data={projects ?? []} />
-      {projects != undefined && <AddProject />}
+      <DataTable columns={columns} data={initialProjects} />
+      <AddProject />
     </div>
   );
 }

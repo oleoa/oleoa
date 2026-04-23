@@ -1,10 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
-
 import {
   Dialog,
   DialogContent,
@@ -24,35 +20,36 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
-import { Stack } from "./interfaces";
-import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import type { Stack } from "@/db/types";
+import { createStack, updateStack, deleteStack } from "./actions";
 
-export default function StacksManager() {
-  const stacks = useQuery(api.stacks.get);
+export default function StacksManager({ initialStacks }: { initialStacks: Stack[] }) {
   return (
     <div>
       <div className="flex flex-wrap md:justify-start justify-center gap-4">
-        {stacks
-          ? stacks.map((s, i) => <StackCard stack={s} key={i} />)
-          : Array.from({ length: 24 }).map((_, i: number) => (
-              <Skeleton key={i} className="h-24 w-24 rounded-lg" />
-            ))}
-        {stacks != undefined && <AddStack />}
+        {initialStacks.map((s) => (
+          <StackCard stack={s} key={s._id} />
+        ))}
+        <AddStack />
       </div>
     </div>
   );
 }
 
 function AddStack() {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [href, setHref] = useState("");
-  const createStack = useMutation(api.stacks.create);
-  const handleCreate = () => {
-    createStack({ name, href });
+  const handleCreate = async () => {
+    await createStack(name, href);
+    setName("");
+    setHref("");
+    router.refresh();
   };
 
   return (
@@ -70,14 +67,14 @@ function AddStack() {
               <div className="flex gap-4 items-center justify-center">
                 <p>Name:</p>
                 <Input
-                  defaultValue={name}
+                  value={name}
                   onChange={(e) => setName(e.target.value)}
                 />
               </div>
               <div className="flex gap-4 items-center justify-center">
                 <p>Source:</p>
                 <Input
-                  defaultValue={href}
+                  value={href}
                   onChange={(e) => setHref(e.target.value)}
                 />
               </div>
@@ -93,37 +90,28 @@ function AddStack() {
 }
 
 function StackCard({ stack }: { stack: Stack }) {
+  const router = useRouter();
   const [stackState, setStackState] = useState(stack);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+
   useEffect(() => {
     setStackState(stack);
   }, [stack]);
 
-  const updateStack = useMutation(api.stacks.update);
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const generateUploadUrl = useMutation(api.stacks.generateUploadUrl);
   const handleUpdate = async () => {
-    const { _id, name, href } = stackState;
-
-    // Step 1: Get a short-lived upload URL
-    const postUrl = await generateUploadUrl();
-
-    // Step 2: POST the file to the URL
-    const result = await fetch(postUrl, {
-      method: "POST",
-      headers: { "Content-Type": selectedImage!.type },
-      body: selectedImage,
-    });
-    const { storageId } = await result.json();
-
-    // Step 3: Save the newly allocated storage id to the database
-    updateStack({ id: _id as Id<"stacks">, name, href, image: storageId });
-
+    let formData: FormData | null = null;
+    if (selectedImage) {
+      formData = new FormData();
+      formData.append("image", selectedImage);
+    }
+    await updateStack(stack._id, stackState.name, stackState.href, formData);
     setSelectedImage(null);
+    router.refresh();
   };
 
-  const deleteStack = useMutation(api.stacks.destroy);
-  const handleDelete = () => {
-    deleteStack({ id: stack._id as Id<"stacks"> });
+  const handleDelete = async () => {
+    await deleteStack(stack._id);
+    router.refresh();
   };
 
   return (
@@ -167,7 +155,7 @@ function StackCard({ stack }: { stack: Stack }) {
                     type="file"
                     accept="image/*"
                     onChange={(event) =>
-                      setSelectedImage(event.target.files![0])
+                      setSelectedImage(event.target.files?.[0] ?? null)
                     }
                   />
                 </div>
