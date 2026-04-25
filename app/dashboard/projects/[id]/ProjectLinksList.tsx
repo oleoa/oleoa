@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import {
   Github,
@@ -12,7 +12,6 @@ import {
   Trash2,
   Pencil,
   Plus,
-  ExternalLink,
 } from "lucide-react";
 import {
   Dialog,
@@ -25,7 +24,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Field from "@/components/editorial/Field";
-import SectionCard from "@/components/editorial/SectionCard";
 import type { ProjectLink, ProjectLinkKind } from "@/db/types";
 import {
   addProjectLink,
@@ -43,7 +41,7 @@ const KINDS: { value: ProjectLinkKind; label: string }[] = [
 ];
 
 function iconFor(kind: ProjectLinkKind | null) {
-  const cls = "h-4 w-4";
+  const cls = "h-6 w-6";
   switch (kind) {
     case "vercel":
       return <Triangle className={cls} />;
@@ -68,55 +66,73 @@ export default function ProjectLinksList({
   links: ProjectLink[];
 }) {
   return (
-    <SectionCard
-      title="Links externos"
-      action={<AddLinkDialog projectId={projectId} />}
-    >
-      <ul className="divide-y divide-stone-200 border border-stone-200">
-        {links.length === 0 && (
-          <li className="px-3 py-4 text-sm text-stone-500">
-            Nenhum link adicionado.
-          </li>
-        )}
+    <section>
+      <div className="mono text-[10px] uppercase tracking-widest text-stone-500 mb-3">
+        Links externos
+      </div>
+      <div className="flex flex-wrap gap-3">
         {links.map((link) => (
-          <LinkRow key={link._id} link={link} />
+          <LinkTile key={link._id} link={link} />
         ))}
-      </ul>
-    </SectionCard>
+        <AddLinkDialog
+          projectId={projectId}
+          trigger={
+            <button
+              type="button"
+              aria-label="Adicionar link"
+              className="h-20 w-56 border border-dashed border-stone-300 flex items-center justify-center text-stone-400 hover:text-stone-700 hover:border-stone-500 transition-colors cursor-pointer"
+            >
+              <Plus className="h-5 w-5" />
+            </button>
+          }
+        />
+      </div>
+    </section>
   );
 }
 
-function LinkRow({ link }: { link: ProjectLink }) {
+function LinkTile({ link }: { link: ProjectLink }) {
   const router = useRouter();
   const handleDelete = async () => {
     await deleteProjectLink(link._id);
     router.refresh();
   };
   return (
-    <li className="flex items-center gap-2 px-3 py-2 text-sm">
-      <span className="text-stone-600">{iconFor(link.kind)}</span>
+    <div className="group relative h-20 w-56">
       <a
         href={link.url}
         target="_blank"
         rel="noreferrer"
-        className="flex-1 truncate hover:underline"
+        className="h-full w-full bg-white border border-stone-300 flex items-center gap-3 px-4 text-stone-700 hover:border-stone-500 hover:text-stone-900 transition-colors"
+        title={link.label}
       >
-        {link.label}
+        <span className="shrink-0">{iconFor(link.kind)}</span>
+        <span className="mono text-[11px] uppercase tracking-widest text-stone-600 truncate flex-1 min-w-0">
+          {link.label}
+        </span>
       </a>
-      <ExternalLink className="h-3 w-3 text-stone-400" />
-      <EditLinkDialog link={link} />
-      <button
-        type="button"
-        onClick={handleDelete}
-        aria-label={`Remover ${link.label}`}
-      >
-        <Trash2 className="h-3.5 w-3.5 text-red-500 cursor-pointer" />
-      </button>
-    </li>
+      <div className="absolute top-1 right-1 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <EditLinkDialog link={link} />
+        <button
+          type="button"
+          onClick={handleDelete}
+          aria-label={`Remover ${link.label}`}
+          className="bg-white/80 backdrop-blur-sm p-0.5 rounded cursor-pointer"
+        >
+          <Trash2 className="h-3 w-3 text-red-500" />
+        </button>
+      </div>
+    </div>
   );
 }
 
-function AddLinkDialog({ projectId }: { projectId: string }) {
+function AddLinkDialog({
+  projectId,
+  trigger,
+}: {
+  projectId: string;
+  trigger?: ReactNode;
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [state, setState] = useState<{
@@ -140,9 +156,11 @@ function AddLinkDialog({ projectId }: { projectId: string }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button type="button" variant="outline" size="sm">
-          <Plus className="h-4 w-4" /> Adicionar link
-        </Button>
+        {trigger ?? (
+          <Button type="button" variant="outline" size="sm">
+            <Plus className="h-4 w-4" /> Adicionar link
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -218,8 +236,12 @@ function EditLinkDialog({ link }: { link: ProjectLink }) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button type="button" aria-label={`Editar ${link.label}`}>
-          <Pencil className="h-3.5 w-3.5 text-stone-500 cursor-pointer" />
+        <button
+          type="button"
+          aria-label={`Editar ${link.label}`}
+          className="bg-white/80 backdrop-blur-sm p-0.5 rounded cursor-pointer"
+        >
+          <Pencil className="h-3 w-3 text-stone-600" />
         </button>
       </DialogTrigger>
       <DialogContent>

@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import Image from "next/image";
-import Me from "@/lib/assets/me.jpeg";
+import Me from "@/lib/assets/me.jpg";
 import { toTitleCase } from "@/lib/utils";
 import type { Stack } from "@/db/types";
 
@@ -13,11 +13,13 @@ export default function Sobre({ stacks }: { stacks: Stack[] }) {
           <h2 className="display text-4xl md:text-5xl font-black leading-[0.95] tracking-tight mb-8">
             Sobre.
           </h2>
-          <div className="border border-stone-300">
+          <div className="relative aspect-square border border-stone-300">
             <Image
               src={Me}
               alt="Leonardo Abreu"
-              className="w-full h-auto object-cover grayscale"
+              fill
+              sizes="(min-width: 768px) 41vw, 100vw"
+              className="object-cover object-center grayscale"
               placeholder="blur"
               priority
             />
@@ -45,8 +47,8 @@ export default function Sobre({ stacks }: { stacks: Stack[] }) {
           <p className="mt-6 text-[1.0625rem] leading-[1.75] text-stone-800">
             Meu trabalho hoje se divide em duas frentes: produtos próprios da
             Strutura — CRM de conversas, sites para autoridades digitais,
-            avaliação psicométrica para terapeutas — e engajamentos pontuais
-            com clientes que precisam de engenharia precisa, como o{" "}
+            avaliação psicométrica para terapeutas — e engajamentos pontuais com
+            clientes que precisam de engenharia precisa, como o{" "}
             <em className="italic">Portal Aviadores</em>, uma corretora de
             aeronaves no Campo de Marte.
           </p>

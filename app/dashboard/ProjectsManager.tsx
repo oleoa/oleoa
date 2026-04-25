@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowUpDown, List } from "lucide-react";
 import { buildColumns } from "./columns";
 import { DataTable } from "./data-table";
@@ -25,15 +26,26 @@ export default function ProjectsManager({
 }: {
   initialProjects: Project[];
 }) {
+  const router = useRouter();
   const [view, setView] = useState<View>("table");
   const [filter, setFilter] = useState<Filter>("all");
   const columns = useMemo(() => buildColumns(), []);
+  const openProject = (p: Project) =>
+    router.push(`/dashboard/projects/${p._id}`);
   const filtered = useMemo(
     () =>
       filter === "all"
         ? initialProjects
         : initialProjects.filter((p) => p.status === filter),
     [initialProjects, filter]
+  );
+  const commercial = useMemo(
+    () => filtered.filter((p) => p.type === "commercial"),
+    [filtered]
+  );
+  const personal = useMemo(
+    () => filtered.filter((p) => p.type === "personal"),
+    [filtered]
   );
 
   return (
@@ -79,7 +91,20 @@ export default function ProjectsManager({
         </div>
       </div>
       {view === "table" ? (
-        <DataTable columns={columns} data={filtered} />
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <h3 className="mono-label uppercase tracking-widest text-xs text-stone-500">
+              Comercial
+            </h3>
+            <DataTable columns={columns} data={commercial} onRowClick={openProject} />
+          </div>
+          <div className="space-y-2">
+            <h3 className="mono-label uppercase tracking-widest text-xs text-stone-500">
+              Pessoal
+            </h3>
+            <DataTable columns={columns} data={personal} onRowClick={openProject} />
+          </div>
+        </div>
       ) : (
         <ProjectOrderEditor
           projects={initialProjects}

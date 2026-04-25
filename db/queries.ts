@@ -182,6 +182,8 @@ export async function listProjectsForDashboard(): Promise<Project[]> {
     const { data, error } = await supabase()
         .from("projects")
         .select(PROJECT_WITH_DASHBOARD)
+        .order("type", { ascending: true })
+        .order("position", { ascending: true, nullsFirst: false })
         .order("updated_at", { ascending: false });
     if (error) throw error;
     return (data as unknown as ProjectRow[]).map(mapProject);

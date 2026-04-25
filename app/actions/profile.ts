@@ -1,7 +1,6 @@
 "use server";
 
 import bcrypt from "bcryptjs";
-import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import { supabase } from "@/db/client";
 import { getUserById } from "@/db/queries";
@@ -40,9 +39,6 @@ export async function updateProfileAction(
         .update({ name, email })
         .eq("id", userId);
     if (updateErr) throw updateErr;
-
-    revalidatePath("/settings");
-    revalidatePath("/dashboard");
 
     return { error: null, success: true };
 }

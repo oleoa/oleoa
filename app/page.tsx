@@ -13,12 +13,14 @@ export default async function Home() {
     listProjects(),
     auth(),
   ]);
+  const commercialProjects = projects.filter((p) => p.type === "commercial");
+  const personalProjects = projects.filter((p) => p.type === "personal");
   return (
     <PageFrame session={session?.user ? { email: session.user.email ?? null } : null}>
       <Hero />
       <Sobre stacks={stacks} />
-      <Trabalhos projects={projects} />
-      <Experimentos />
+      <Trabalhos projects={commercialProjects} />
+      <Experimentos projects={personalProjects} />
       <Contato />
     </PageFrame>
   );

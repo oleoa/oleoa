@@ -13,7 +13,7 @@
 
   /* shadcn tokens remapped onto the stone palette so dashboard primitives
    * in components/ui/* keep working without their shadcn-looking styles.  */
-  --background: #fafaf9; /* stone-50  */
+  --background: #faf9f6; /* off-white */
   --foreground: #1c1917; /* stone-900 */
   --card: #ffffff;
   --card-foreground: #1c1917;
@@ -195,4 +195,29 @@
   --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
   --sidebar-border: hsl(240 3.7% 15.9%);
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
+}
+
+/* ---------------------------------------------------------------------------
+ * Dashboard loader — letterpress composition animations.
+ * Used by app/dashboard/loading.tsx.
+ * ------------------------------------------------------------------------ */
+
+@keyframes glyph-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.animate-glyph-spin {
+  animation: glyph-spin 8s linear infinite;
+  transform-origin: center;
+}
+
+@keyframes ink-sweep {
+  0%, 100% { transform: scaleX(0); }
+  50%      { transform: scaleX(1); }
+}
+
+.animate-ink-sweep {
+  transform-origin: left center;
+  animation: ink-sweep 2s ease-in-out infinite;
 }

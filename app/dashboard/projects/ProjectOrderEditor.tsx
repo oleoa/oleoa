@@ -41,17 +41,31 @@ export default function ProjectOrderEditor({
   onSaved?: () => void;
 }) {
   const router = useRouter();
-  const publicOnly = useMemo(
-    () => projects.filter((p) => p.isPublic),
+  const publicCommercial = useMemo(
+    () => projects.filter((p) => p.isPublic && p.type === "commercial"),
     [projects]
   );
-  const [items, setItems] = useState(publicOnly);
+  const publicPersonal = useMemo(
+    () => projects.filter((p) => p.isPublic && p.type === "personal"),
+    [projects]
+  );
+  const [commercial, setCommercial] = useState(publicCommercial);
+  const [personal, setPersonal] = useState(publicPersonal);
   const [isSaving, startTransition] = useTransition();
 
-  const dirty = useMemo(() => {
-    if (items.length !== publicOnly.length) return true;
-    return items.some((p, i) => p._id !== publicOnly[i]._id);
-  }, [items, publicOnly]);
+  const isDirty = (next: Project[], base: Project[]) => {
+    if (next.length !== base.length) return true;
+    return next.some((p, i) => p._id !== base[i]._id);
+  };
+  const commercialDirty = useMemo(
+    () => isDirty(commercial, publicCommercial),
+    [commercial, publicCommercial]
+  );
+  const personalDirty = useMemo(
+    () => isDirty(personal, publicPersonal),
+    [personal, publicPersonal]
+  );
+  const dirty = commercialDirty || personalDirty;
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -62,25 +76,32 @@ export default function ProjectOrderEditor({
     })
   );
 
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (!over || active.id === over.id) return;
-    const oldIdx = items.findIndex((p) => p._id === active.id);
-    const newIdx = items.findIndex((p) => p._id === over.id);
-    if (oldIdx === -1 || newIdx === -1) return;
-    setItems(arrayMove(items, oldIdx, newIdx));
-  };
+  const handleDragEnd =
+    (
+      items: Project[],
+      setItems: React.Dispatch<React.SetStateAction<Project[]>>
+    ) =>
+    (event: DragEndEvent) => {
+      const { active, over } = event;
+      if (!over || active.id === over.id) return;
+      const oldIdx = items.findIndex((p) => p._id === active.id);
+      const newIdx = items.findIndex((p) => p._id === over.id);
+      if (oldIdx === -1 || newIdx === -1) return;
+      setItems(arrayMove(items, oldIdx, newIdx));
+    };
 
   const handleSave = () => {
-    const ids = items.map((p) => p._id);
     startTransition(async () => {
-      await reorderPublicProjects(ids);
+      if (commercialDirty || personalDirty) {
+        const ids = [...commercial, ...personal].map((p) => p._id);
+        await reorderPublicProjects(ids);
+      }
       router.refresh();
       onSaved?.();
     });
   };
 
-  if (items.length === 0) {
+  if (commercial.length === 0 && personal.length === 0) {
     return (
       <p className="text-sm text-stone-500 border border-stone-200 px-3 py-4">
         Nenhum projeto público pra ordenar.
@@ -89,7 +110,7 @@ export default function ProjectOrderEditor({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-6">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <p className="mono text-[10px] uppercase tracking-widest text-stone-500">
           Arraste pra reordenar. Clique em Salvar pra confirmar.
@@ -103,22 +124,60 @@ export default function ProjectOrderEditor({
           {isSaving ? "Salvando…" : "Salvar ordem"}
         </Button>
       </div>
-      <DndContext
+      <SortableGroup
+        title="Comercial"
+        items={commercial}
+        onDragEnd={handleDragEnd(commercial, setCommercial)}
         sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext
-          items={items.map((p) => p._id)}
-          strategy={verticalListSortingStrategy}
+      />
+      <SortableGroup
+        title="Pessoal"
+        items={personal}
+        onDragEnd={handleDragEnd(personal, setPersonal)}
+        sensors={sensors}
+      />
+    </div>
+  );
+}
+
+function SortableGroup({
+  title,
+  items,
+  onDragEnd,
+  sensors,
+}: {
+  title: string;
+  items: Project[];
+  onDragEnd: (event: DragEndEvent) => void;
+  sensors: ReturnType<typeof useSensors>;
+}) {
+  return (
+    <div className="space-y-2">
+      <h3 className="mono-label uppercase tracking-widest text-xs text-stone-500">
+        {title}
+      </h3>
+      {items.length === 0 ? (
+        <p className="text-sm text-stone-500 border border-stone-200 px-3 py-4">
+          Nenhum projeto público pra ordenar.
+        </p>
+      ) : (
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={onDragEnd}
         >
-          <ul className="divide-y divide-stone-200 border-2 border-stone-900">
-            {items.map((p, i) => (
-              <SortableRow key={p._id} project={p} index={i} />
-            ))}
-          </ul>
-        </SortableContext>
-      </DndContext>
+          <SortableContext
+            items={items.map((p) => p._id)}
+            strategy={verticalListSortingStrategy}
+          >
+            <ul className="divide-y divide-stone-200 border-2 border-stone-900">
+              {items.map((p, i) => (
+                <SortableRow key={p._id} project={p} index={i} />
+              ))}
+            </ul>
+          </SortableContext>
+        </DndContext>
+      )}
     </div>
   );
 }

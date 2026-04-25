@@ -31,6 +31,8 @@ export const metadata: Metadata = {
   description: "Engenheiro de software e fundador da Strutura.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default function RootLayout({
   children,
 }: Readonly<{

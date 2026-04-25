@@ -32,6 +32,7 @@ export function buildColumns(): ColumnDef<Project>[] {
           <Link
             href={`/dashboard/projects/${p._id}`}
             className="font-medium hover:underline"
+            onClick={(e) => e.stopPropagation()}
           >
             {p.name}
           </Link>
@@ -68,15 +69,6 @@ export function buildColumns(): ColumnDef<Project>[] {
       cell: ({ row }) => (
         <Chip variant={STATUS_VARIANT[row.original.status]}>
           {STATUS_LABELS[row.original.status]}
-        </Chip>
-      ),
-    },
-    {
-      accessorKey: "type",
-      header: "Tipo",
-      cell: ({ row }) => (
-        <Chip variant={row.original.type === "commercial" ? "strong" : "outline"}>
-          {row.original.type === "commercial" ? "comercial" : "pessoal"}
         </Chip>
       ),
     },

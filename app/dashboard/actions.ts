@@ -1,7 +1,6 @@
 "use server";
 
 import { auth } from "@/auth";
-import { revalidatePath } from "next/cache";
 import { supabase } from "@/db/client";
 import { uploadImage, deleteImage } from "@/lib/storage";
 import type {
@@ -15,25 +14,6 @@ import type {
 async function requireAuth() {
     const session = await auth();
     if (!session?.user) throw new Error("Unauthorized");
-}
-
-function refreshPublic() {
-    revalidatePath("/");
-}
-
-function refreshDashboardProject(projectId: string) {
-    revalidatePath("/dashboard");
-    revalidatePath("/dashboard/projects");
-    revalidatePath(`/dashboard/projects/${projectId}`);
-}
-
-function refreshDashboardClient(clientId: string | null | undefined) {
-    if (!clientId) {
-        revalidatePath("/dashboard/clients");
-        return;
-    }
-    revalidatePath("/dashboard/clients");
-    revalidatePath(`/dashboard/clients/${clientId}`);
 }
 
 // ---------- Projects ----------
@@ -74,57 +54,38 @@ function projectRow(input: ProjectInput) {
 
 export async function addProject(input: ProjectInput): Promise<{ id: string }> {
     await requireAuth();
-    const { data, error } = await supabase()
+    const sb = supabase();
+    let position = input.position;
+    if (position === null) {
+        const { data: maxRow, error: maxErr } = await sb
+            .from("projects")
+            .select("position")
+            .eq("type", input.type)
+            .order("position", { ascending: false, nullsFirst: false })
+            .limit(1)
+            .maybeSingle();
+        if (maxErr) throw maxErr;
+        position = maxRow?.position != null ? (maxRow.position as number) + 1 : 0;
+    }
+    const { data, error } = await sb
         .from("projects")
-        .insert(projectRow(input))
+        .insert(projectRow({ ...input, position }))
         .select("id")
         .single();
     if (error) throw error;
-    refreshPublic();
-    revalidatePath("/dashboard");
-    revalidatePath("/dashboard/projects");
-    refreshDashboardClient(input.clientId);
     return { id: data.id as string };
 }
 
 export async function updateProject(id: string, input: ProjectInput): Promise<void> {
     await requireAuth();
-    const sb = supabase();
-    const { data: prev, error: prevErr } = await sb
-        .from("projects")
-        .select("client_id")
-        .eq("id", id)
-        .maybeSingle();
-    if (prevErr) throw prevErr;
-    const prevClientId = (prev?.client_id as string | null) ?? null;
-
-    const { error } = await sb.from("projects").update(projectRow(input)).eq("id", id);
+    const { error } = await supabase().from("projects").update(projectRow(input)).eq("id", id);
     if (error) throw error;
-
-    refreshPublic();
-    refreshDashboardProject(id);
-    refreshDashboardClient(prevClientId);
-    if (input.clientId !== prevClientId) refreshDashboardClient(input.clientId);
 }
 
 export async function deleteProject(id: string): Promise<void> {
     await requireAuth();
-    const sb = supabase();
-    const { data: prev, error: prevErr } = await sb
-        .from("projects")
-        .select("client_id")
-        .eq("id", id)
-        .maybeSingle();
-    if (prevErr) throw prevErr;
-    const prevClientId = (prev?.client_id as string | null) ?? null;
-
-    const { error } = await sb.from("projects").delete().eq("id", id);
+    const { error } = await supabase().from("projects").delete().eq("id", id);
     if (error) throw error;
-
-    refreshPublic();
-    revalidatePath("/dashboard");
-    revalidatePath("/dashboard/projects");
-    refreshDashboardClient(prevClientId);
 }
 
 export async function reorderPublicProjects(ids: string[]): Promise<void> {
@@ -132,9 +93,6 @@ export async function reorderPublicProjects(ids: string[]): Promise<void> {
     if (ids.length === 0) return;
     const { error } = await supabase().rpc("reorder_projects", { ids });
     if (error) throw error;
-    revalidatePath("/", "layout");
-    revalidatePath("/dashboard");
-    revalidatePath("/dashboard/projects");
 }
 
 export async function addStackToProject(projectId: string, stackId: string): Promise<void> {
@@ -157,8 +115,32 @@ export async function addStackToProject(projectId: string, stackId: string): Pro
             { onConflict: "project_id,stack_id", ignoreDuplicates: true }
         );
     if (error) throw error;
-    refreshPublic();
-    refreshDashboardProject(projectId);
+}
+
+export async function addStacksToProject(projectId: string, stackIds: string[]): Promise<void> {
+    await requireAuth();
+    if (stackIds.length === 0) return;
+    const sb = supabase();
+    const { data: maxRow, error: maxErr } = await sb
+        .from("project_stacks")
+        .select("position")
+        .eq("project_id", projectId)
+        .order("position", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+    if (maxErr) throw maxErr;
+    const nextPos = maxRow ? (maxRow.position as number) + 1 : 0;
+
+    const rows = stackIds.map((stack_id, i) => ({
+        project_id: projectId,
+        stack_id,
+        position: nextPos + i,
+    }));
+
+    const { error } = await sb
+        .from("project_stacks")
+        .upsert(rows, { onConflict: "project_id,stack_id", ignoreDuplicates: true });
+    if (error) throw error;
 }
 
 export async function removeStackFromProject(projectId: string, stackId: string): Promise<void> {
@@ -169,8 +151,6 @@ export async function removeStackFromProject(projectId: string, stackId: string)
         .eq("project_id", projectId)
         .eq("stack_id", stackId);
     if (error) throw error;
-    refreshPublic();
-    refreshDashboardProject(projectId);
 }
 
 // ---------- Stacks ----------
@@ -183,8 +163,6 @@ export async function createStack(name: string, href: string): Promise<{ id: str
         .select("id")
         .single();
     if (error) throw error;
-    refreshPublic();
-    revalidatePath("/dashboard/stacks");
     return { id: data.id as string };
 }
 
@@ -222,8 +200,6 @@ export async function updateStack(
     if (newImageUrl && oldImageUrl && oldImageUrl !== newImageUrl) {
         await deleteImage(oldImageUrl);
     }
-    refreshPublic();
-    revalidatePath("/dashboard/stacks");
 }
 
 export async function deleteStack(id: string): Promise<void> {
@@ -241,8 +217,6 @@ export async function deleteStack(id: string): Promise<void> {
     if (error) throw error;
 
     if (oldImage) await deleteImage(oldImage);
-    refreshPublic();
-    revalidatePath("/dashboard/stacks");
 }
 
 // ---------- Clients ----------
@@ -267,7 +241,6 @@ export async function createClient(input: ClientInput): Promise<{ id: string }> 
         .select("id")
         .single();
     if (error) throw error;
-    revalidatePath("/dashboard/clients");
     return { id: data.id as string };
 }
 
@@ -283,9 +256,6 @@ export async function updateClient(id: string, input: ClientInput): Promise<void
         })
         .eq("id", id);
     if (error) throw error;
-    refreshDashboardClient(id);
-    revalidatePath("/dashboard");
-    revalidatePath("/dashboard/projects");
 }
 
 export async function deleteClient(id: string): Promise<void> {
@@ -303,9 +273,6 @@ export async function deleteClient(id: string): Promise<void> {
     if (error) throw error;
 
     if (avatar) await deleteImage(avatar);
-    revalidatePath("/dashboard/clients");
-    revalidatePath("/dashboard");
-    revalidatePath("/dashboard/projects");
 }
 
 export async function setClientAvatar(clientId: string, formData: FormData): Promise<void> {
@@ -329,8 +296,6 @@ export async function setClientAvatar(clientId: string, formData: FormData): Pro
     if (error) throw error;
 
     if (oldAvatar && oldAvatar !== newUrl) await deleteImage(oldAvatar);
-    refreshDashboardClient(clientId);
-    revalidatePath("/dashboard/projects");
 }
 
 export async function removeClientAvatar(clientId: string): Promise<void> {
@@ -348,8 +313,6 @@ export async function removeClientAvatar(clientId: string): Promise<void> {
     if (error) throw error;
 
     if (oldAvatar) await deleteImage(oldAvatar);
-    refreshDashboardClient(clientId);
-    revalidatePath("/dashboard/projects");
 }
 
 // ---------- Project TODOs ----------
@@ -375,7 +338,6 @@ export async function addTodo(projectId: string, title: string): Promise<{ id: s
         .select("id")
         .single();
     if (error) throw error;
-    refreshDashboardProject(projectId);
     return { id: data.id as string };
 }
 
@@ -384,40 +346,18 @@ export async function updateTodo(
     patch: { title?: string; done?: boolean }
 ): Promise<void> {
     await requireAuth();
-    const sb = supabase();
-    const { data: existing, error: exErr } = await sb
-        .from("project_todos")
-        .select("project_id")
-        .eq("id", id)
-        .maybeSingle();
-    if (exErr) throw exErr;
-    const projectId = (existing?.project_id as string | undefined) ?? null;
-
     const updates: { title?: string; done?: boolean } = {};
     if (patch.title !== undefined) updates.title = patch.title;
     if (patch.done !== undefined) updates.done = patch.done;
-    if (Object.keys(updates).length > 0) {
-        const { error } = await sb.from("project_todos").update(updates).eq("id", id);
-        if (error) throw error;
-    }
-    if (projectId) refreshDashboardProject(projectId);
+    if (Object.keys(updates).length === 0) return;
+    const { error } = await supabase().from("project_todos").update(updates).eq("id", id);
+    if (error) throw error;
 }
 
 export async function deleteTodo(id: string): Promise<void> {
     await requireAuth();
-    const sb = supabase();
-    const { data: existing, error: exErr } = await sb
-        .from("project_todos")
-        .select("project_id")
-        .eq("id", id)
-        .maybeSingle();
-    if (exErr) throw exErr;
-    const projectId = (existing?.project_id as string | undefined) ?? null;
-
-    const { error } = await sb.from("project_todos").delete().eq("id", id);
+    const { error } = await supabase().from("project_todos").delete().eq("id", id);
     if (error) throw error;
-
-    if (projectId) refreshDashboardProject(projectId);
 }
 
 export async function reorderTodos(projectId: string, ids: string[]): Promise<void> {
@@ -428,7 +368,6 @@ export async function reorderTodos(projectId: string, ids: string[]): Promise<vo
         ids,
     });
     if (error) throw error;
-    refreshDashboardProject(projectId);
 }
 
 // ---------- Project external links ----------
@@ -467,43 +406,20 @@ export async function addProjectLink(
         .select("id")
         .single();
     if (error) throw error;
-    refreshDashboardProject(projectId);
     return { id: data.id as string };
 }
 
 export async function updateProjectLink(id: string, input: ProjectLinkInput): Promise<void> {
     await requireAuth();
-    const sb = supabase();
-    const { data: existing, error: exErr } = await sb
-        .from("project_links")
-        .select("project_id")
-        .eq("id", id)
-        .maybeSingle();
-    if (exErr) throw exErr;
-    const projectId = (existing?.project_id as string | undefined) ?? null;
-
-    const { error } = await sb
+    const { error } = await supabase()
         .from("project_links")
         .update({ label: input.label, url: input.url, kind: input.kind })
         .eq("id", id);
     if (error) throw error;
-
-    if (projectId) refreshDashboardProject(projectId);
 }
 
 export async function deleteProjectLink(id: string): Promise<void> {
     await requireAuth();
-    const sb = supabase();
-    const { data: existing, error: exErr } = await sb
-        .from("project_links")
-        .select("project_id")
-        .eq("id", id)
-        .maybeSingle();
-    if (exErr) throw exErr;
-    const projectId = (existing?.project_id as string | undefined) ?? null;
-
-    const { error } = await sb.from("project_links").delete().eq("id", id);
+    const { error } = await supabase().from("project_links").delete().eq("id", id);
     if (error) throw error;
-
-    if (projectId) refreshDashboardProject(projectId);
 }
