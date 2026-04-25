@@ -3,7 +3,7 @@
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
-import { sql } from "@/db/client";
+import { supabase } from "@/db/client";
 import { getUserById } from "@/db/queries";
 
 export type FormState = { error: string | null; success: boolean };
@@ -25,18 +25,21 @@ export async function updateProfileAction(
     if (!email) return { error: "Email é obrigatório.", success: false };
     if (!EMAIL_RE.test(email)) return { error: "Email inválido.", success: false };
 
-    const conflict = (await sql`
-        SELECT 1 FROM users
-        WHERE lower(email) = ${email} AND id <> ${userId}
-        LIMIT 1
-    `) as { "?column?": number }[];
-    if (conflict.length > 0) return { error: "Email já em uso.", success: false };
+    const sb = supabase();
+    const { data: conflict, error: conflictErr } = await sb
+        .from("users")
+        .select("id")
+        .ilike("email", email)
+        .neq("id", userId)
+        .limit(1);
+    if (conflictErr) throw conflictErr;
+    if (conflict && conflict.length > 0) return { error: "Email já em uso.", success: false };
 
-    await sql`
-        UPDATE users
-        SET name = ${name}, email = ${email}, updated_at = now()
-        WHERE id = ${userId}
-    `;
+    const { error: updateErr } = await sb
+        .from("users")
+        .update({ name, email })
+        .eq("id", userId);
+    if (updateErr) throw updateErr;
 
     revalidatePath("/settings");
     revalidatePath("/dashboard");
@@ -73,11 +76,11 @@ export async function changePasswordAction(
     if (!ok) return { error: "Senha atual incorreta.", success: false };
 
     const password_hash = await bcrypt.hash(newPassword, 12);
-    await sql`
-        UPDATE users
-        SET password_hash = ${password_hash}, updated_at = now()
-        WHERE id = ${userId}
-    `;
+    const { error: updateErr } = await supabase()
+        .from("users")
+        .update({ password_hash })
+        .eq("id", userId);
+    if (updateErr) throw updateErr;
 
     return { error: null, success: true };
 }

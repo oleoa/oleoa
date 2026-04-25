@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
-import { sql } from "@/db/client";
+import { supabase } from "@/db/client";
 import authConfig from "./auth.config";
 
 type DbUser = {
@@ -25,14 +25,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 const password = String(creds?.password ?? "");
                 if (!email || !password) return null;
 
-                const rows = (await sql`
-                    SELECT id, email, password_hash, name
-                    FROM users
-                    WHERE lower(email) = ${email}
-                    LIMIT 1
-                `) as DbUser[];
-
-                const user = rows[0];
+                const { data, error } = await supabase()
+                    .from("users")
+                    .select("id, email, password_hash, name")
+                    .ilike("email", email)
+                    .maybeSingle();
+                if (error) throw error;
+                const user = data as DbUser | null;
                 if (!user) return null;
 
                 const ok = await bcrypt.compare(password, user.password_hash);

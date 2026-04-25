@@ -29,7 +29,6 @@ export default function PageFrame({
 }: PageFrameProps) {
   const pathname = usePathname();
   const isDashboard = pathname?.startsWith("/dashboard");
-  const isWork = pathname?.startsWith("/work/");
   const initial = session?.email?.[0]?.toUpperCase() ?? "·";
 
   return (
@@ -47,14 +46,6 @@ export default function PageFrame({
           </Link>
 
           <nav className="flex items-center gap-6">
-            {isWork && (
-              <Link
-                href="/"
-                className="mono text-xs uppercase tracking-widest text-stone-500 hover:text-stone-900 transition-colors hidden md:inline"
-              >
-                ← índice
-              </Link>
-            )}
             {!isDashboard && session && (
               <Link
                 href="/dashboard"

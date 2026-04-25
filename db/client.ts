@@ -1,15 +1,18 @@
-import { Pool, neon } from "@neondatabase/serverless";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-if (!process.env.DATABASE_URL) {
-    throw new Error("Missing DATABASE_URL in environment");
-}
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-export const sql = neon(process.env.DATABASE_URL);
+if (!url) throw new Error("Missing NEXT_PUBLIC_SUPABASE_URL");
+if (!serviceRoleKey) throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY");
 
-let _pool: Pool | null = null;
-export function pool(): Pool {
-    if (!_pool) {
-        _pool = new Pool({ connectionString: process.env.DATABASE_URL });
+let _client: SupabaseClient | null = null;
+
+export function supabase(): SupabaseClient {
+    if (!_client) {
+        _client = createClient(url!, serviceRoleKey!, {
+            auth: { persistSession: false, autoRefreshToken: false },
+        });
     }
-    return _pool;
+    return _client;
 }

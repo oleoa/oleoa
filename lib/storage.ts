@@ -44,7 +44,7 @@ function slugify(s: string): string {
 
 export async function uploadImage(
     file: File,
-    prefix: "covers" | "stacks",
+    prefix: "covers" | "stacks" | "clients",
     nameHint?: string
 ): Promise<string> {
     const mime = file.type || "application/octet-stream";

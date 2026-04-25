@@ -1,4 +1,3 @@
-import Link from "next/link";
 import SectionHeader from "@/components/editorial/SectionHeader";
 import Chip from "@/components/editorial/Chip";
 import type { Project } from "@/db/types";
@@ -15,7 +14,7 @@ export default function Trabalhos({ projects }: { projects: Project[] }) {
               Trabalhos <em className="font-normal italic">selecionados.</em>
             </>
           }
-          subtitle="Produtos próprios e engajamentos com clientes. Cada linha abre um estudo com o problema, a abordagem e o que ficou ao final."
+          subtitle="Produtos próprios e engajamentos com clientes."
         />
 
         {projects.length === 0 ? (
@@ -40,10 +39,7 @@ export default function Trabalhos({ projects }: { projects: Project[] }) {
 
 function TrabalhoRow({ project, index }: { project: Project; index: number }) {
   const indexLabel = String(index).padStart(2, "0");
-  const href = project.slug
-    ? `/work/${project.slug}`
-    : project.link ?? project.source ?? "#";
-  const external = !project.slug;
+  const href = project.link ?? project.source ?? null;
 
   const Inner = (
     <div className="grid grid-cols-12 gap-6 px-1 py-8 group hover:bg-stone-100 transition-colors">
@@ -53,21 +49,18 @@ function TrabalhoRow({ project, index }: { project: Project; index: number }) {
 
       <div className="col-span-10 md:col-span-7">
         <div className="flex items-baseline gap-3 flex-wrap mb-2">
-          {project.client && (
-            <span className="mono-label text-stone-500">{project.client}</span>
-          )}
           {project.year && (
-            <span className="mono-label text-stone-400">· {project.year}</span>
+            <span className="mono-label text-stone-500">{project.year}</span>
           )}
-          {project.role && (
-            <span className="mono-label text-stone-400">· {project.role}</span>
-          )}
+          <span className="mono-label text-stone-400">
+            {project.type === "commercial" ? "· comercial" : "· pessoal"}
+          </span>
         </div>
         <h3 className="display text-2xl md:text-4xl font-black leading-tight tracking-tight text-stone-900 group-hover:text-stone-700 transition-colors">
           {project.name}
         </h3>
         <p className="mt-3 text-base md:text-lg leading-relaxed text-stone-700 max-w-2xl">
-          {project.summary ?? project.description}
+          {project.description}
         </p>
         {project.stacks.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-1.5">
@@ -80,24 +73,24 @@ function TrabalhoRow({ project, index }: { project: Project; index: number }) {
         )}
       </div>
 
-      <div className="hidden md:flex col-span-4 items-end justify-end">
-        <span className="mono text-xs uppercase tracking-widest text-stone-500 group-hover:text-stone-900 transition-colors">
-          {project.slug ? "ver estudo →" : "visitar →"}
-        </span>
-      </div>
+      {href && (
+        <div className="hidden md:flex col-span-4 items-end justify-end">
+          <span className="mono text-xs uppercase tracking-widest text-stone-500 group-hover:text-stone-900 transition-colors">
+            visitar →
+          </span>
+        </div>
+      )}
     </div>
   );
 
   return (
     <li className="border-b border-stone-300">
-      {external ? (
+      {href ? (
         <a href={href} target="_blank" rel="noreferrer" className="block">
           {Inner}
         </a>
       ) : (
-        <Link href={href} className="block">
-          {Inner}
-        </Link>
+        <div className="block">{Inner}</div>
       )}
     </li>
   );

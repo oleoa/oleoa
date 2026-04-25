@@ -5,31 +5,69 @@ export type Stack = {
     image: string | null;
 };
 
+export type Client = {
+    _id: string;
+    name: string;
+    avatar: string | null;
+    email: string | null;
+    company: string | null;
+    notes: string | null;
+};
+
+export type ProjectTodo = {
+    _id: string;
+    projectId: string;
+    title: string;
+    done: boolean;
+    position: number;
+};
+
+export type ProjectLinkKind =
+    | "vercel"
+    | "neon"
+    | "github"
+    | "figma"
+    | "docs"
+    | "other";
+
+export type ProjectLink = {
+    _id: string;
+    projectId: string;
+    label: string;
+    url: string;
+    kind: ProjectLinkKind | null;
+    position: number;
+};
+
+export type ProjectStatus = "active" | "complete" | "paused";
+export type ProjectType = "personal" | "commercial";
+export type BudgetStatus = "pending" | "partial" | "paid" | "none";
+export type BudgetCurrency = "BRL" | "USD" | "EUR";
+
 export type Project = {
     _id: string;
     name: string;
     description: string;
+    type: ProjectType;
+    position: number | null;
     link: string | null;
     source: string | null;
-    slug: string | null;
-    client: string | null;
-    role: string | null;
     year: string | null;
-    cover: string | null;
-    summary: string | null;
-    problem: string | null;
-    approach: string | null;
-    outcome: string | null;
-    featured: boolean;
-    order: number | null;
     stacks: Stack[];
+    status: ProjectStatus;
+    isPublic: boolean;
+    budgetAmount: number | null;
+    budgetCurrency: BudgetCurrency;
+    budgetStatus: BudgetStatus;
+    clientId: string | null;
+    clientRef: Client | null;
+    todosDone: number;
+    todosTotal: number;
 };
 
-export type ProjectNavEntry = {
-    _id: string;
-    name: string;
-    slug: string;
-    order: number | null;
+export type ProjectDetail = Project & {
+    todos: ProjectTodo[];
+    links: ProjectLink[];
 };
 
 export type User = {

@@ -1,6 +1,6 @@
 import { parseArgs } from "node:util";
 import bcrypt from "bcryptjs";
-import { sql } from "./client";
+import { supabase } from "./client";
 
 async function main() {
     const { values } = parseArgs({
@@ -24,17 +24,17 @@ async function main() {
 
     const password_hash = await bcrypt.hash(password, 12);
 
-    const rows = (await sql`
-        INSERT INTO users (email, password_hash, name)
-        VALUES (${email}, ${password_hash}, ${name})
-        ON CONFLICT (lower(email)) DO UPDATE
-            SET password_hash = EXCLUDED.password_hash,
-                name = COALESCE(EXCLUDED.name, users.name)
-        RETURNING id, email, name
-    `) as { id: string; email: string; name: string | null }[];
+    const { data, error } = await supabase()
+        .from("users")
+        .upsert(
+            { email, password_hash, name },
+            { onConflict: "email" }
+        )
+        .select("id, email, name")
+        .single();
+    if (error) throw error;
 
-    const u = rows[0];
-    console.log(`✓ user upserted: id=${u.id} email=${u.email}${u.name ? ` name=${u.name}` : ""}`);
+    console.log(`✓ user upserted: id=${data.id} email=${data.email}${data.name ? ` name=${data.name}` : ""}`);
 }
 
 main().catch((err) => {
