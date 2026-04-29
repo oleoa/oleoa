@@ -3,6 +3,8 @@ import type {
     BudgetCurrency,
     BudgetStatus,
     Client,
+    ClientProjectSummary,
+    ClientWithProjects,
     Project,
     ProjectDetail,
     ProjectLink,
@@ -248,6 +250,47 @@ export async function listClients(): Promise<Client[]> {
         .order("name", { ascending: true });
     if (error) throw error;
     return (data as ClientRow[]).map(toClient);
+}
+
+type ClientProjectRow = {
+    id: string;
+    name: string;
+    status: ProjectStatus;
+    type: ProjectType;
+    year: string | null;
+};
+
+type ClientWithProjectsRow = ClientRow & {
+    projects: ClientProjectRow[] | null;
+};
+
+export async function listClientsWithProjects(): Promise<ClientWithProjects[]> {
+    const { data, error } = await supabase()
+        .from("clients")
+        .select(
+            "id, name, avatar_url, email, company, notes, projects(id, name, status, type, year)"
+        )
+        .order("name", { ascending: true });
+    if (error) throw error;
+    return (data as ClientWithProjectsRow[]).map((row) => ({
+        ...toClient(row),
+        projects: (row.projects ?? [])
+            .map(
+                (p): ClientProjectSummary => ({
+                    _id: p.id,
+                    name: p.name,
+                    status: p.status,
+                    type: p.type,
+                    year: p.year,
+                })
+            )
+            .sort((a, b) => {
+                const ay = a.year ?? "";
+                const by = b.year ?? "";
+                if (ay === by) return a.name.localeCompare(b.name);
+                return by.localeCompare(ay);
+            }),
+    }));
 }
 
 export async function getClientById(id: string): Promise<Client | null> {

@@ -1,11 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Field from "@/components/editorial/Field";
-import SectionCard from "@/components/editorial/SectionCard";
 import type {
   BudgetCurrency,
   BudgetStatus,
@@ -23,39 +29,34 @@ const STATUSES: { value: BudgetStatus; label: string }[] = [
   { value: "none", label: "Sem cobrança" },
 ];
 
-export function formatBudget(amount: number | null, currency: string): string {
-  if (amount === null) return "—";
-  try {
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency,
-    }).format(amount);
-  } catch {
-    return `${currency} ${amount.toFixed(2)}`;
-  }
-}
-
-export default function BudgetCard({ project }: { project: ProjectDetail }) {
+export default function BudgetDialog({
+  project,
+  open,
+  onOpenChange,
+}: {
+  project: ProjectDetail;
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
+}) {
   const router = useRouter();
-  const [mode, setMode] = useState<"view" | "edit">("view");
   const [amount, setAmount] = useState(
     project.budgetAmount !== null ? String(project.budgetAmount) : ""
   );
-  const [currency, setCurrency] = useState(project.budgetCurrency);
+  const [currency, setCurrency] = useState<BudgetCurrency>(
+    project.budgetCurrency
+  );
   const [status, setStatus] = useState<BudgetStatus>(project.budgetStatus);
   const [saving, setSaving] = useState(false);
 
-  const handleEdit = () => {
-    setAmount(project.budgetAmount !== null ? String(project.budgetAmount) : "");
-    setCurrency(project.budgetCurrency);
-    setStatus(project.budgetStatus);
-    setMode("edit");
-  };
-
-  const handleCancel = () => {
-    handleEdit();
-    setMode("view");
-  };
+  useEffect(() => {
+    if (open) {
+      setAmount(
+        project.budgetAmount !== null ? String(project.budgetAmount) : ""
+      );
+      setCurrency(project.budgetCurrency);
+      setStatus(project.budgetStatus);
+    }
+  }, [open, project]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -67,32 +68,23 @@ export default function BudgetCard({ project }: { project: ProjectDetail }) {
         budgetCurrency: currency,
         budgetStatus: status,
       });
-      setMode("view");
+      onOpenChange(false);
       router.refresh();
     } finally {
       setSaving(false);
     }
   };
 
-  const statusLabel = STATUSES.find((s) => s.value === project.budgetStatus)?.label;
-
   return (
-    <SectionCard
-      title="Orçamento"
-      mode={mode}
-      onEdit={handleEdit}
-      onCancel={handleCancel}
-    >
-      <div className="flex items-baseline justify-between">
-        <span className="display text-3xl font-semibold">
-          {formatBudget(project.budgetAmount, project.budgetCurrency)}
-        </span>
-        <span className="mono text-[10px] uppercase tracking-widest text-stone-500">
-          {statusLabel}
-        </span>
-      </div>
-      {mode === "edit" && (
-        <>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Editar orçamento</DialogTitle>
+          <DialogDescription className="sr-only">
+            Formulário para editar o orçamento do projeto
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
           <div className="grid grid-cols-3 gap-3">
             <Field label="Valor">
               <Input
@@ -107,7 +99,9 @@ export default function BudgetCard({ project }: { project: ProjectDetail }) {
             <Field label="Moeda">
               <select
                 value={currency}
-                onChange={(e) => setCurrency(e.target.value as BudgetCurrency)}
+                onChange={(e) =>
+                  setCurrency(e.target.value as BudgetCurrency)
+                }
                 className="w-full border border-stone-300 px-3 py-2 text-sm"
               >
                 {CURRENCIES.map((c) => (
@@ -120,7 +114,9 @@ export default function BudgetCard({ project }: { project: ProjectDetail }) {
             <Field label="Status">
               <select
                 value={status}
-                onChange={(e) => setStatus(e.target.value as BudgetStatus)}
+                onChange={(e) =>
+                  setStatus(e.target.value as BudgetStatus)
+                }
                 className="w-full border border-stone-300 px-3 py-2 text-sm"
               >
                 {STATUSES.map((s) => (
@@ -131,13 +127,16 @@ export default function BudgetCard({ project }: { project: ProjectDetail }) {
               </select>
             </Field>
           </div>
-          <div className="flex justify-end">
+          <div className="grid grid-cols-2 gap-3 pt-2">
+            <Button variant="outline" onClick={() => onOpenChange(false)}>
+              Cancelar
+            </Button>
             <Button onClick={handleSave} disabled={saving}>
-              {saving ? "Salvando…" : "Salvar orçamento"}
+              {saving ? "Salvando…" : "Salvar"}
             </Button>
           </div>
-        </>
-      )}
-    </SectionCard>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }

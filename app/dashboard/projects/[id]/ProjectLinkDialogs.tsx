@@ -4,14 +4,10 @@ import { useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import {
   Github,
-  Figma,
   Database,
   FileText,
   Link as LinkIcon,
   Triangle,
-  Trash2,
-  Pencil,
-  Plus,
 } from "lucide-react";
 import {
   Dialog,
@@ -25,113 +21,39 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Field from "@/components/editorial/Field";
 import type { ProjectLink, ProjectLinkKind } from "@/db/types";
-import {
-  addProjectLink,
-  updateProjectLink,
-  deleteProjectLink,
-} from "../../actions";
+import { addProjectLink, updateProjectLink } from "../../actions";
 
-const KINDS: { value: ProjectLinkKind; label: string }[] = [
+export const KINDS: { value: ProjectLinkKind; label: string }[] = [
   { value: "vercel", label: "Vercel" },
   { value: "neon", label: "Neon" },
   { value: "github", label: "GitHub" },
-  { value: "figma", label: "Figma" },
   { value: "docs", label: "Docs" },
   { value: "other", label: "Outro" },
 ];
 
-function iconFor(kind: ProjectLinkKind | null) {
-  const cls = "h-6 w-6";
+export function iconFor(kind: ProjectLinkKind | null, className = "h-6 w-6") {
   switch (kind) {
     case "vercel":
-      return <Triangle className={cls} />;
+      return <Triangle className={className} />;
     case "github":
-      return <Github className={cls} />;
-    case "figma":
-      return <Figma className={cls} />;
+      return <Github className={className} />;
     case "neon":
-      return <Database className={cls} />;
+      return <Database className={className} />;
     case "docs":
-      return <FileText className={cls} />;
+      return <FileText className={className} />;
     default:
-      return <LinkIcon className={cls} />;
+      return <LinkIcon className={className} />;
   }
 }
 
-export default function ProjectLinksList({
-  projectId,
-  links,
-}: {
-  projectId: string;
-  links: ProjectLink[];
-}) {
-  return (
-    <section>
-      <div className="mono text-[10px] uppercase tracking-widest text-stone-500 mb-3">
-        Links externos
-      </div>
-      <div className="flex flex-wrap gap-3">
-        {links.map((link) => (
-          <LinkTile key={link._id} link={link} />
-        ))}
-        <AddLinkDialog
-          projectId={projectId}
-          trigger={
-            <button
-              type="button"
-              aria-label="Adicionar link"
-              className="h-20 w-56 border border-dashed border-stone-300 flex items-center justify-center text-stone-400 hover:text-stone-700 hover:border-stone-500 transition-colors cursor-pointer"
-            >
-              <Plus className="h-5 w-5" />
-            </button>
-          }
-        />
-      </div>
-    </section>
-  );
-}
-
-function LinkTile({ link }: { link: ProjectLink }) {
-  const router = useRouter();
-  const handleDelete = async () => {
-    await deleteProjectLink(link._id);
-    router.refresh();
-  };
-  return (
-    <div className="group relative h-20 w-56">
-      <a
-        href={link.url}
-        target="_blank"
-        rel="noreferrer"
-        className="h-full w-full bg-white border border-stone-300 flex items-center gap-3 px-4 text-stone-700 hover:border-stone-500 hover:text-stone-900 transition-colors"
-        title={link.label}
-      >
-        <span className="shrink-0">{iconFor(link.kind)}</span>
-        <span className="mono text-[11px] uppercase tracking-widest text-stone-600 truncate flex-1 min-w-0">
-          {link.label}
-        </span>
-      </a>
-      <div className="absolute top-1 right-1 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-        <EditLinkDialog link={link} />
-        <button
-          type="button"
-          onClick={handleDelete}
-          aria-label={`Remover ${link.label}`}
-          className="bg-white/80 backdrop-blur-sm p-0.5 rounded cursor-pointer"
-        >
-          <Trash2 className="h-3 w-3 text-red-500" />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function AddLinkDialog({
+export function AddLinkDialog({
   projectId,
   trigger,
+  defaultKind = "other",
 }: {
   projectId: string;
-  trigger?: ReactNode;
+  trigger: ReactNode;
+  defaultKind?: ProjectLinkKind;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -139,7 +61,12 @@ function AddLinkDialog({
     label: string;
     url: string;
     kind: ProjectLinkKind;
-  }>({ label: "", url: "", kind: "other" });
+  }>({ label: "", url: "", kind: defaultKind });
+
+  const handleOpenChange = (next: boolean) => {
+    setOpen(next);
+    if (next) setState({ label: "", url: "", kind: defaultKind });
+  };
 
   const handleAdd = async () => {
     if (!state.label.trim() || !state.url.trim()) return;
@@ -148,20 +75,14 @@ function AddLinkDialog({
       url: state.url,
       kind: state.kind,
     });
-    setState({ label: "", url: "", kind: "other" });
+    setState({ label: "", url: "", kind: defaultKind });
     setOpen(false);
     router.refresh();
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger ?? (
-          <Button type="button" variant="outline" size="sm">
-            <Plus className="h-4 w-4" /> Adicionar link
-          </Button>
-        )}
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Adicionar link externo</DialogTitle>
@@ -218,7 +139,13 @@ function AddLinkDialog({
   );
 }
 
-function EditLinkDialog({ link }: { link: ProjectLink }) {
+export function EditLinkDialog({
+  link,
+  trigger,
+}: {
+  link: ProjectLink;
+  trigger: ReactNode;
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [state, setState] = useState({
@@ -235,15 +162,7 @@ function EditLinkDialog({ link }: { link: ProjectLink }) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <button
-          type="button"
-          aria-label={`Editar ${link.label}`}
-          className="bg-white/80 backdrop-blur-sm p-0.5 rounded cursor-pointer"
-        >
-          <Pencil className="h-3 w-3 text-stone-600" />
-        </button>
-      </DialogTrigger>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Editar link</DialogTitle>

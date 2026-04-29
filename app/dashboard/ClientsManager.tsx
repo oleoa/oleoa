@@ -13,19 +13,32 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Field from "@/components/editorial/Field";
+import Chip from "@/components/editorial/Chip";
 import { Plus, UserCircle2 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import type { Client } from "@/db/types";
+import type {
+  ClientProjectSummary,
+  ClientWithProjects,
+  ProjectStatus,
+} from "@/db/types";
 import { createClient } from "./actions";
+
+const STATUS_VARIANT: Record<ProjectStatus, "strong" | "soft" | "outline"> = {
+  active: "strong",
+  paused: "soft",
+  complete: "outline",
+};
+
+const MAX_VISIBLE_PROJECTS = 4;
 
 export default function ClientsManager({
   initialClients,
 }: {
-  initialClients: Client[];
+  initialClients: ClientWithProjects[];
 }) {
   return (
-    <div className="flex flex-wrap md:justify-start justify-center gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
       {initialClients.map((c) => (
         <ClientCard client={c} key={c._id} />
       ))}
@@ -66,9 +79,15 @@ function AddClient() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <div className="rounded-lg w-40 h-24 border-2 flex items-center justify-center hover:bg-neutral-200 transition-all duration-300 cursor-pointer">
-          <Plus />
-        </div>
+        <button
+          type="button"
+          className="rounded-lg min-h-[180px] border-2 border-dashed flex items-center justify-center gap-2 text-stone-500 hover:bg-neutral-200 hover:text-stone-900 transition-all duration-300 cursor-pointer"
+        >
+          <Plus className="h-5 w-5" />
+          <span className="mono text-[11px] uppercase tracking-widest">
+            Adicionar cliente
+          </span>
+        </button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -128,29 +147,88 @@ function AddClient() {
   );
 }
 
-function ClientCard({ client }: { client: Client }) {
+function ClientCard({ client }: { client: ClientWithProjects }) {
+  const visibleProjects = client.projects.slice(0, MAX_VISIBLE_PROJECTS);
+  const overflow = client.projects.length - visibleProjects.length;
+
   return (
-    <Link
-      href={`/dashboard/clients/${client._id}`}
-      className="rounded-lg w-40 h-24 border-2 flex items-center gap-3 px-3 hover:bg-neutral-200 transition-all duration-300 cursor-pointer"
-    >
-      {client.avatar ? (
-        <img
-          src={client.avatar}
-          alt=""
-          className="h-10 w-10 rounded-full object-cover border border-stone-300 shrink-0"
-        />
-      ) : (
-        <div className="h-10 w-10 rounded-full border border-stone-300 flex items-center justify-center text-stone-400 shrink-0">
-          <UserCircle2 className="h-6 w-6" />
+    <div className="rounded-lg border-2 p-5 min-h-[180px] flex flex-col gap-4 bg-white">
+      <Link
+        href={`/dashboard/clients/${client._id}`}
+        className="flex items-start gap-3 group"
+      >
+        {client.avatar ? (
+          <img
+            src={client.avatar}
+            alt=""
+            className="h-12 w-12 rounded-full object-cover border border-stone-300 shrink-0"
+          />
+        ) : (
+          <div className="h-12 w-12 rounded-full border border-stone-300 flex items-center justify-center text-stone-400 shrink-0">
+            <UserCircle2 className="h-7 w-7" />
+          </div>
+        )}
+        <div className="flex-1 min-w-0">
+          <p className="font-medium text-base truncate group-hover:underline">
+            {client.name}
+          </p>
+          {client.company && (
+            <p className="text-xs text-stone-500 truncate mt-0.5">
+              {client.company}
+            </p>
+          )}
+          {client.email && (
+            <p className="mono text-[11px] text-stone-600 truncate mt-1">
+              {client.email}
+            </p>
+          )}
         </div>
+      </Link>
+
+      {client.notes && (
+        <p className="line-clamp-2 text-sm text-stone-600">{client.notes}</p>
       )}
-      <div className="flex-1 min-w-0">
-        <p className="font-medium text-sm truncate">{client.name}</p>
-        {client.company && (
-          <p className="text-xs text-stone-500 truncate">{client.company}</p>
+
+      <div className="mt-auto pt-2 border-t border-stone-100 space-y-2">
+        <p className="mono text-[10px] uppercase tracking-widest text-stone-500">
+          {client.projects.length === 0
+            ? "Sem projetos"
+            : `${client.projects.length} ${
+                client.projects.length === 1 ? "projeto" : "projetos"
+              }`}
+        </p>
+        {visibleProjects.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {visibleProjects.map((p) => (
+              <ProjectChip key={p._id} project={p} />
+            ))}
+            {overflow > 0 && (
+              <Link
+                href={`/dashboard/clients/${client._id}`}
+                className="mono text-[10px] uppercase tracking-widest text-stone-500 hover:text-stone-900 self-center"
+              >
+                +{overflow}
+              </Link>
+            )}
+          </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function ProjectChip({ project }: { project: ClientProjectSummary }) {
+  return (
+    <Link
+      href={`/dashboard/projects/${project._id}`}
+      className="hover:opacity-80 transition-opacity"
+      title={project.name}
+    >
+      <Chip variant={STATUS_VARIANT[project.status]} className="normal-case tracking-normal">
+        <span className="truncate inline-block max-w-[10rem] align-bottom">
+          {project.name}
+        </span>
+      </Chip>
     </Link>
   );
 }

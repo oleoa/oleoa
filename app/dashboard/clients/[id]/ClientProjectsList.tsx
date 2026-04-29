@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/card";
 import Chip from "@/components/editorial/Chip";
 import type { Project, ProjectStatus } from "@/db/types";
-import { formatBudget } from "../../projects/[id]/BudgetCard";
+import { formatBudget } from "@/lib/budget";
 
 const STATUS_LABELS: Record<ProjectStatus, string> = {
   active: "ativo",
@@ -45,10 +45,15 @@ export default function ClientProjectsList({
                   className="flex flex-col gap-1 px-3 py-2 hover:bg-stone-100"
                 >
                   <span className="font-medium text-sm truncate">{p.name}</span>
-                  <span className="flex items-center gap-2">
+                  <span className="flex items-center gap-2 flex-wrap">
                     <Chip variant={STATUS_VARIANT[p.status]}>
                       {STATUS_LABELS[p.status]}
                     </Chip>
+                    {p.year && (
+                      <span className="mono text-[10px] text-stone-500">
+                        {p.year}
+                      </span>
+                    )}
                     {p.budgetAmount !== null && (
                       <span className="mono text-[10px] text-stone-500">
                         {formatBudget(p.budgetAmount, p.budgetCurrency)}

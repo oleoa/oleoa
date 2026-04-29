@@ -14,6 +14,18 @@ export type Client = {
     notes: string | null;
 };
 
+export type ClientProjectSummary = {
+    _id: string;
+    name: string;
+    status: ProjectStatus;
+    type: ProjectType;
+    year: string | null;
+};
+
+export type ClientWithProjects = Client & {
+    projects: ClientProjectSummary[];
+};
+
 export type ProjectTodo = {
     _id: string;
     projectId: string;
@@ -26,7 +38,6 @@ export type ProjectLinkKind =
     | "vercel"
     | "neon"
     | "github"
-    | "figma"
     | "docs"
     | "other";
 

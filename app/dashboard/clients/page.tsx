@@ -1,8 +1,8 @@
-import { listClients } from "@/db/queries";
+import { listClientsWithProjects } from "@/db/queries";
 import ClientsManager from "../ClientsManager";
 
 export default async function ClientsListPage() {
-  const clients = await listClients();
+  const clients = await listClientsWithProjects();
   return (
     <div className="max-w-7xl mx-auto px-6 py-10 space-y-6">
       <header>

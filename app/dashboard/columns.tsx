@@ -7,7 +7,7 @@ import { UserCircle2 } from "lucide-react";
 
 import Chip from "@/components/editorial/Chip";
 import type { Project, ProjectStatus } from "@/db/types";
-import { formatBudget } from "./projects/[id]/BudgetCard";
+import { formatBudget } from "@/lib/budget";
 
 const STATUS_LABELS: Record<ProjectStatus, string> = {
   active: "ativo",

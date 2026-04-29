@@ -5,7 +5,14 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { UserCircle2, Pencil, X, Plus, ExternalLink } from "lucide-react";
-import SectionCard from "@/components/editorial/SectionCard";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Popover,
   PopoverContent,
@@ -19,14 +26,6 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Field from "@/components/editorial/Field";
@@ -40,20 +39,24 @@ import {
 } from "../../actions";
 import { toProjectInput } from "./project-input";
 
-export default function ClientPicker({
+export default function ClientDialog({
   project,
   allClients,
+  open,
+  onOpenChange,
 }: {
   project: ProjectDetail;
   allClients: Client[];
+  open: boolean;
+  onOpenChange: (v: boolean) => void;
 }) {
   const router = useRouter();
   const selected = project.clientRef;
-  const [open, setOpen] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [creating, setCreating] = useState(false);
 
   const handleSelect = async (clientId: string | null) => {
-    setOpen(false);
+    setPickerOpen(false);
     await updateProject(project._id, {
       ...toProjectInput(project),
       clientId,
@@ -62,107 +65,115 @@ export default function ClientPicker({
   };
 
   return (
-    <SectionCard
-      title="Cliente"
-      action={
-        selected && (
-          <Link
-            href={`/dashboard/clients/${selected._id}`}
-            className="mono text-[10px] uppercase tracking-widest text-stone-500 hover:text-stone-900 inline-flex items-center gap-1"
-          >
-            ver <ExternalLink className="h-3 w-3" />
-          </Link>
-        )
-      }
-    >
-      <div className="flex items-center gap-3">
-        {selected?.avatar ? (
-          <img
-            src={selected.avatar}
-            alt=""
-            className="h-12 w-12 rounded-full object-cover border border-stone-300"
-          />
-        ) : (
-          <div className="h-12 w-12 rounded-full border border-stone-300 flex items-center justify-center text-stone-400">
-            <UserCircle2 className="h-7 w-7" />
-          </div>
-        )}
-        <div className="flex-1 min-w-0">
-          <p className="font-medium truncate">
-            {selected?.name ?? (
-              <span className="text-stone-500 italic">
-                Nenhum cliente associado
-              </span>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Editar cliente</DialogTitle>
+          <DialogDescription className="sr-only">
+            Selecionar, criar ou editar o cliente associado ao projeto
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            {selected?.avatar ? (
+              <img
+                src={selected.avatar}
+                alt=""
+                className="h-12 w-12 rounded-full object-cover border border-stone-300"
+              />
+            ) : (
+              <div className="h-12 w-12 rounded-full border border-stone-300 flex items-center justify-center text-stone-400">
+                <UserCircle2 className="h-7 w-7" />
+              </div>
             )}
-          </p>
-          {selected?.company && (
-            <p className="text-xs text-stone-500 truncate">
-              {selected.company}
-            </p>
-          )}
-          {selected?.email && (
-            <p className="text-xs text-stone-500 truncate">{selected.email}</p>
-          )}
-        </div>
-        {selected && <EditClientDialog client={selected} />}
-      </div>
-      <div className="flex items-center flex-wrap gap-2">
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
-            <Button variant="outline" size="sm">
-              {selected ? "Trocar cliente" : "Selecionar cliente"}
+            <div className="flex-1 min-w-0">
+              <p className="font-medium truncate">
+                {selected?.name ?? (
+                  <span className="text-stone-500 italic">
+                    Nenhum cliente associado
+                  </span>
+                )}
+              </p>
+              {selected?.company && (
+                <p className="text-xs text-stone-500 truncate">
+                  {selected.company}
+                </p>
+              )}
+              {selected?.email && (
+                <p className="text-xs text-stone-500 truncate">
+                  {selected.email}
+                </p>
+              )}
+            </div>
+            {selected && <EditClientDialog client={selected} />}
+            {selected && (
+              <Link
+                href={`/dashboard/clients/${selected._id}`}
+                className="mono text-[10px] uppercase tracking-widest text-stone-500 hover:text-stone-900 inline-flex items-center gap-1"
+              >
+                ver <ExternalLink className="h-3 w-3" />
+              </Link>
+            )}
+          </div>
+          <div className="flex items-center flex-wrap gap-2">
+            <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm">
+                  {selected ? "Trocar cliente" : "Selecionar cliente"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="p-0" side="bottom" align="start">
+                <Command>
+                  <CommandInput placeholder="Buscar cliente..." />
+                  <CommandList>
+                    <CommandEmpty>Nenhum cliente.</CommandEmpty>
+                    <CommandGroup>
+                      {allClients.map((c) => (
+                        <CommandItem
+                          key={c._id}
+                          value={c.name}
+                          onSelect={() => handleSelect(c._id)}
+                        >
+                          {c.name}
+                          {c.company && (
+                            <span className="ml-2 text-stone-500 text-xs">
+                              {c.company}
+                            </span>
+                          )}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setCreating(true)}
+            >
+              <Plus className="h-4 w-4" /> Novo cliente
             </Button>
-          </PopoverTrigger>
-          <PopoverContent className="p-0" side="bottom" align="start">
-            <Command>
-              <CommandInput placeholder="Buscar cliente..." />
-              <CommandList>
-                <CommandEmpty>Nenhum cliente.</CommandEmpty>
-                <CommandGroup>
-                  {allClients.map((c) => (
-                    <CommandItem
-                      key={c._id}
-                      value={c.name}
-                      onSelect={() => handleSelect(c._id)}
-                    >
-                      {c.name}
-                      {c.company && (
-                        <span className="ml-2 text-stone-500 text-xs">
-                          {c.company}
-                        </span>
-                      )}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => setCreating(true)}
-        >
-          <Plus className="h-4 w-4" /> Novo cliente
-        </Button>
-        {selected && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => handleSelect(null)}
-          >
-            <X className="h-4 w-4" /> Remover
-          </Button>
-        )}
-      </div>
-      <CreateClientDialog
-        open={creating}
-        onOpenChange={setCreating}
-        onCreated={handleSelect}
-      />
-    </SectionCard>
+            {selected && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => handleSelect(null)}
+              >
+                <X className="h-4 w-4" /> Remover
+              </Button>
+            )}
+          </div>
+          <CreateClientDialog
+            open={creating}
+            onOpenChange={setCreating}
+            onCreated={handleSelect}
+          />
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 

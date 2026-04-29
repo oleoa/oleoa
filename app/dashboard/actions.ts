@@ -423,3 +423,13 @@ export async function deleteProjectLink(id: string): Promise<void> {
     const { error } = await supabase().from("project_links").delete().eq("id", id);
     if (error) throw error;
 }
+
+export async function reorderProjectLinks(projectId: string, ids: string[]): Promise<void> {
+    await requireAuth();
+    if (ids.length === 0) return;
+    const { error } = await supabase().rpc("reorder_project_links", {
+        p_project_id: projectId,
+        ids,
+    });
+    if (error) throw error;
+}
